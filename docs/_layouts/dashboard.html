@@ -23,8 +23,17 @@
 
   <!-- PAGE CONTENT (Shiny iframe goes here) -->
   <main class="content">
+  {% if page.shiny_url %}
+    <iframe 
+      class="shiny-embed"
+      id="shiny-frame"
+      src="{{ page.shiny_url }}{% if page.level == 'states' %}?state={{ page.state }}{% endif %}"
+      allowfullscreen>
+    </iframe>
+  {% else %}
     {{ content }}
-  </main>
+  {% endif %}
+</main>
 
 </body>
 </html>
