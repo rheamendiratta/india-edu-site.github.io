@@ -85,12 +85,13 @@ body {
 
 /* ── Main Content Area ── */
 .content {
-  padding: 2rem;
+  padding: 0;
 }
 
 /* ── Shiny iframe container ── */
 .shiny-embed {
   width: 100%;
-  height: 85vh;
+  height: calc(100vh - 130px);
   border: none;
+  display: block;
 }
