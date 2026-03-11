@@ -1,8 +1,8 @@
 /* ── Site Header ── */
 .site-header {
-  background-color: #1e2140;
-  padding: 1rem 2rem;
-  border-bottom: 1px solid #3a3f66;
+  background-color: #161929;
+  padding: 0.75rem 2rem;
+  border-bottom: 1px solid #2e3250;
 }
 
 .site-header-title {
