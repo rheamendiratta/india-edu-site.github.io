@@ -119,20 +119,19 @@ ui <- page_sidebar(
     
     hr(),
     
-    uiOutput("india_callout")
+    uiOutput("india_callout"),
+    hr(),
+    uiOutput("indicator_description")
   ),
   
   # ── Main: side by side ────────────────────────────────────────────────────
-  card(
-    fluidRow(
-      column(
-        width = 8,  # 70%
-        plotlyOutput("choropleth", height = "520px")
-      ),
-      column(
-        width = 4,  # 30%
-        plotlyOutput("coverage_chart", height = "520px")
-      )
+  tagList(
+    card(
+      plotlyOutput("choropleth", height = "520px")
+    ),
+    card(
+      style = "margin-top: 12px;",
+      plotlyOutput("coverage_chart", height = "300px")
     )
   )
 )

@@ -15,7 +15,7 @@ server <- function(input, output, session) {
   
   # ── Update year slider when indicator changes ───────────────────────────────
   
-  observeEvent(input$indicator, {
+  observe({
     years_available <- map_data |>
       filter(source_code == input$indicator) |>
       pull(year) |>
@@ -28,7 +28,7 @@ server <- function(input, output, session) {
       max   = max(years_available),
       value = max(years_available)
     )
-  })
+  }) |> bindEvent(input$indicator, ignoreNULL = TRUE, ignoreInit = FALSE)
   
   # ── India callout ───────────────────────────────────────────────────────────
   
@@ -71,8 +71,7 @@ server <- function(input, output, session) {
         is_india   = ISO3166.1.Alpha.3 == "IND",
         hover_text = paste0(
           "<b>", name, "</b><br>",
-          label, ": ",
-          ifelse(is.na(value), "No data", paste0(round(value, 2), " (", ISO3166.1.Alpha.3, ")"))
+          ifelse(is.na(value), "No data", round(value, 2))
         )
       )
     
@@ -80,20 +79,30 @@ server <- function(input, output, session) {
       data       = geo_joined,
       split      = ~name,
       color      = ~value,
-      colors     = colorRamp(c("#f0eeea", "#c9a0a0", "#2e3250")),
-      stroke     = I("white"),
+      colors     = colorRamp(c("#f2dcc5", "#b8818a", "#2e3250")),
+      stroke     = I("#d5d3cf"),
       span       = I(0.5),
-      text       = ~hover_text,
-      hoverinfo  = "text",
+      alpha      = 1,
+      customdata  = ~hover_text,
+      hovertemplate = "%{customdata}<extra></extra>",
       showlegend = FALSE
     ) |>
       colorbar(
         title      = label,
-        tickfont   = list(family = "Inter", color = "#2e3250"),
-        titlefont  = list(family = "Inter", color = "#2e3250")
+        len        = 0.4,
+        thickness  = 12,
+        x          = 1,
+        y          = 0.5,
+        tickfont   = list(family = "Inter", size = 9, color = "#2e3250"),
+        titlefont  = list(family = "Inter", size = 9, color = "#2e3250")
       ) |>
       layout(
-        margin     = list(l = 0, r = 0, t = 10, b = 0),
+        title = list(
+          text = paste0("Global trends in ", selected_meta()$label),
+          font = list(family = "Inter", size = 13, color = "#2e3250"),
+          x    = 0
+        ),
+        margin = list(l = 0, r = 40, t = 40, b = 0),
         paper_bgcolor = "#fafaf8",
         plot_bgcolor  = "#fafaf8",
         geo        = list(
@@ -113,7 +122,7 @@ server <- function(input, output, session) {
       filter(source_code == input$indicator) |>
       arrange(year) |>
       mutate(
-        bar_color  = ifelse(india_has_data, "#c9a0a0", "#d8d5d0"),
+        bar_color  = ifelse(india_has_data, "#c9a0a0", "#b8c4d4"),
         hover_text = paste0(
           "<b>", year, "</b><br>",
           n_countries, " countries with data",
@@ -130,8 +139,7 @@ server <- function(input, output, session) {
               color = ~bar_color,
               line  = list(color = "rgba(0,0,0,0)", width = 0)
             ),
-            text        = ~hover_text,
-            hoverinfo   = "text"
+            hoverinfo   = "none"
     ) |>
       layout(
         xaxis = list(
@@ -150,11 +158,25 @@ server <- function(input, output, session) {
         plot_bgcolor  = "#fafaf8",
         paper_bgcolor = "#fafaf8",
         font          = list(family = "Inter", color = "#2e3250"),
-        title         = list(
-          text = "Data coverage by year",
+        title = list(
+          text = paste0(
+            "Data coverage by year",
+            "  <span style='font-size:11px; color:#c9a0a0'>■ India has data</span>",
+            "  <span style='font-size:11px; color:#b8c4d4'>■ No India data</span>"
+          ),
           font = list(family = "Inter", size = 12, color = "#2e3250"),
           x    = 0
         )
       )
+  })
+  
+  output$indicator_description <- renderUI({
+    desc <- indicator_descriptions[[input$indicator]]
+    if (!is.null(desc)) {
+      div(
+        style = "color:#a0a8c0; font-size:0.78rem; line-height:1.5; margin-top:4px;",
+        desc
+      )
+    }
   })
 }

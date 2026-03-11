@@ -1,0 +1,10 @@
+name: worldmap
+title:
+username: rheamendiratta
+account: rheamendiratta
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16871525
+bundleId: 11693280
+url: https://rheamendiratta.shinyapps.io/worldmap/
+version: 1
