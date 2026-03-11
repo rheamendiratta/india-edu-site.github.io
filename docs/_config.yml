@@ -34,6 +34,8 @@ plugins:
   - jekyll-feed
 header_pages:
   - index.markdown
+  
+permalink: pretty
 
 # Exclude from processing.
 # The following items will not be processed, by default.
