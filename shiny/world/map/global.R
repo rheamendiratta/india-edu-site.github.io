@@ -8,10 +8,10 @@ library(jsonlite)
 
 # Data 
 
-map_data     <- read_parquet("data/map.parquet")
-coverage     <- read_parquet("data/map_coverage.parquet")
+map_data  <- readRDS("data/map.rds")
+coverage  <- readRDS("data/map_coverage.rds")
 world_geo <- readRDS("data/geo/world_geo.rds")
-registry     <- read_json("data/indicator_registry.json", simplifyVector = TRUE)
+registry  <- readRDS("data/registry.rds")
 
 # Indicator metadata 
 
