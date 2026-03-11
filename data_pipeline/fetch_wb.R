@@ -32,37 +32,56 @@ map_indicators <- tribble(
 fetch_one <- function(id, source_code, database_id, label) {
   message("Fetching [", id, "]: ", label)
   
-  url <- paste0(
-    "https://data360api.worldbank.org/data360/data",
-    "?indicator=", source_code,
-    "&DATABASE_ID=", database_id,
-    "&pageSize=10000"
-  )
+  page_size <- 1000
+  all_pages <- list()
+  offset    <- 0
   
-  resp <- tryCatch(
-    request(url) |> req_timeout(60) |> req_perform(),
-    error = function(e) {
-      message("  ✗ Failed: ", e$message)
-      return(NULL)
-    }
-  )
+  repeat {
+    url <- paste0(
+      "https://data360api.worldbank.org/data360/data",
+      "?indicator=", source_code,
+      "&DATABASE_ID=", database_id,
+      "&pageSize=", page_size,
+      "&offset=", offset
+    )
+    
+    resp <- tryCatch(
+      request(url) |> req_timeout(60) |> req_perform(),
+      error = function(e) {
+        message("  ✗ Failed at offset ", offset, ": ", e$message)
+        return(NULL)
+      }
+    )
+    
+    if (is.null(resp)) break
+    
+    raw <- tryCatch(
+      resp |> resp_body_json(simplifyVector = TRUE),
+      error = function(e) {
+        message("  ✗ Parse error: ", e$message)
+        return(NULL)
+      }
+    )
+    
+    if (is.null(raw$value) || length(raw$value) == 0) break
+    
+    all_pages[[length(all_pages) + 1]] <- raw$value
+    
+    # Check if we have all rows
+    total <- raw$count
+    offset <- offset + page_size
+    message("  ... fetched ", min(offset, total), " of ", total)
+    
+    if (offset >= total) break
+    Sys.sleep(0.3)
+  }
   
-  if (is.null(resp)) return(NULL)
-  
-  raw <- tryCatch(
-    resp |> resp_body_json(simplifyVector = TRUE),
-    error = function(e) {
-      message("  ✗ Parse error: ", e$message)
-      return(NULL)
-    }
-  )
-  
-  if (is.null(raw$value) || length(raw$value) == 0) {
+  if (length(all_pages) == 0) {
     message("  ✗ No data returned")
     return(NULL)
   }
   
-  df <- raw$value |>
+  df <- bind_rows(all_pages) |>
     as_tibble() |>
     transmute(
       indicator_id = id,
@@ -99,3 +118,13 @@ message("Indicators fetched: ", length(all_data), " of ", nrow(map_indicators))
 
 failed <- map_indicators$source_code[!map_indicators$source_code %in% names(all_data)]
 if (length(failed) > 0) message("Failed: ", paste(failed, collapse = ", "))
+
+map_raw <- read_csv("data/raw/wb/map_raw.csv")
+
+map_raw |>
+  group_by(source_code) |>
+  summarise(
+    countries = n_distinct(country_iso3),
+    years     = n_distinct(year),
+    rows      = n()
+  )
