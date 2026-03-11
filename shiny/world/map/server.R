@@ -32,7 +32,10 @@ server <- function(input, output, session) {
   # India callout
   
   output$india_callout <- renderUI({
-    india_val <- map_filtered() |> filter(country_iso3 == "IND") |> pull(value)
+    india_val <- map_filtered() |> 
+      filter(country_iso3 == "IND") |> 
+      slice_max(year, n = 1, with_ties = FALSE) |>
+      pull(value)
     if (length(india_val) == 0 || is.na(india_val)) {
       div(class = "india-callout",
           div("India", style = "font-weight:600; margin-bottom:4px;"),
@@ -121,16 +124,16 @@ server <- function(input, output, session) {
         )
       ) |>
       addLegend(
-        position  = "bottomright",
+        position  = "bottomleft",
         pal       = pal,
         values    = ~value[!is.na(value)],
-        title     = label,
+        title     = paste0(strwrap(label, width = 20), collapse = "<br>"),
         opacity   = 0.85,
         layerId   = "legend",
         labFormat = labelFormat(digits = 2)
       ) |>
       addLegend(
-        position  = "bottomright",
+        position  = "bottomleft",
         colors    = "#1a1a1a",
         labels    = "No data",
         opacity   = 0.85,

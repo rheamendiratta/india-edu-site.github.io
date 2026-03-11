@@ -25,6 +25,15 @@ custom_css <- tags$style(HTML("
   .card { background-color: #fafaf8; border: 1px solid #e8e6e2; }
   .bslib-sidebar-layout > .sidebar hr { border-color: #4a5080; }
   .leaflet-container { background: #fafaf8 !important; }
+  
+  /* Sources footer */
+  .sources-footer {
+    margin-top: 16px; padding: 10px 14px;
+    border-top: 1px solid #e8e6e2;
+    font-size: 0.72rem; color: #A0A8C0; line-height: 1.7;
+  }
+  .sources-footer a { color: #A0A8C0; text-decoration: underline; }
+  .sources-footer a:hover { color: #2e3250; }
 "))
 
 ui <- page_sidebar(
@@ -48,11 +57,18 @@ ui <- page_sidebar(
         style = "padding: 8px 12px 0 12px; font-size: 13px; font-weight: 500; color: #2e3250;",
         textOutput("map_title")
       ),
-      leafletOutput("choropleth", height = "520px")
+      leafletOutput("choropleth", height = "560px")
     ),
     card(
       style = "margin-top: 12px;",
       plotlyOutput("coverage_chart", height = "280px")
+    ),
+    # Sources footer
+    div(class = "sources-footer",
+        tags$b("Sources: "),
+        tags$span("World Bank World Development Indicators (WDI); "),
+        tags$a("data.worldbank.org", href = "https://data.worldbank.org",
+               target = "_blank"), tags$span(". ")
     )
   )
 )

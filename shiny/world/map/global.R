@@ -20,11 +20,12 @@ world_geo <- rmapshaper::ms_simplify(world_geo, keep = 0.05, keep_shapes = TRUE)
 
 # indicators
 
-map_ids <- c(24, 168, 107, 101, 57, 18, 16, 195, 96, 15)
+map_ids <- c(24, 16, 18, 15, 195, 168, 107, 101, 96)
 
 indicator_meta <- registry |>
   filter(id %in% map_ids) |>
-  select(id, source_code, label)
+  select(id, source_code, label) |>
+  arrange(match(id, map_ids))
 
 indicator_choices <- setNames(indicator_meta$source_code, indicator_meta$label)
 

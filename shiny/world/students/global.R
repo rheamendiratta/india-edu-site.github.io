@@ -21,7 +21,7 @@ COL_OFFWHITE    <- "#F0EEEA"
 COL_NEARWHITE   <- "#FAFAF8"
 COL_UDISE       <- "#7A9E9F"
 COL_FEMALE      <- "#d4787a"   # warm coral-rose
-COL_MALE        <- "#5b8fa6"   # teal-slate
+COL_MALE        <- "#4a80b4"   # teal-slate
 COL_GREY_LINE   <- "#D0CEC9"
 COL_STEEL       <- "#b8c4d4"   # other countries bars
 COL_BORDER      <- "#E8E6E2"

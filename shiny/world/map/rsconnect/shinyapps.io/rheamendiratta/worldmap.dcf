@@ -5,7 +5,7 @@ account: rheamendiratta
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 16871525
-bundleId: 11695199
+bundleId: 11696787
 url: https://rheamendiratta.shinyapps.io/worldmap/
 version: 1
 asMultiple: FALSE
