@@ -1,0 +1,14 @@
+<nav class="top-nav">
+  <a href="{{ '/world/' | relative_url }}" 
+     class="{% if page.level == 'world' %}active{% endif %}">
+    World
+  </a>
+  <a href="{{ '/india/' | relative_url }}" 
+     class="{% if page.level == 'india' %}active{% endif %}">
+    India
+  </a>
+  <a href="{{ '/states/' | relative_url }}" 
+     class="{% if page.level == 'states' %}active{% endif %}">
+    States
+  </a>
+</nav>

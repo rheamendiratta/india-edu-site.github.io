@@ -1,0 +1,24 @@
+<nav class="tab-nav">
+
+  {% if page.level == 'world' %}
+    {% assign tabs = "map,students,teachers,schools,finance,human-capital" | split: "," %}
+    {% assign labels = "Map,Students,Teachers,Schools & System,Finance & Expenditure,Human Capital" | split: "," %}
+
+  {% elsif page.level == 'india' %}
+    {% assign tabs = "map,students,teachers,schools,finance,performance" | split: "," %}
+    {% assign labels = "Map,Students,Teachers,Schools & Infrastructure,Finance,Performance" | split: "," %}
+
+  {% elsif page.level == 'states' %}
+    {% assign tabs = "map,students,teachers,schools,performance" | split: "," %}
+    {% assign labels = "Map,Students,Teachers,Schools & Infrastructure,Performance" | split: "," %}
+  {% endif %}
+
+  {% for tab in tabs %}
+    {% assign label = labels[forloop.index0] %}
+    <a href="{{ '/' | append: page.level | append: '/' | append: tab | append: '/' | relative_url }}"
+       class="{% if page.tab == tab %}active{% endif %}">
+      {{ label }}
+    </a>
+  {% endfor %}
+
+</nav>
