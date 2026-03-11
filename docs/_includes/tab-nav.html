@@ -14,11 +14,16 @@
   {% endif %}
 
   {% for tab in tabs %}
-    {% assign label = labels[forloop.index0] %}
-    <a href="{{ '/' | append: page.level | append: '/' | append: tab | append: '/' | relative_url }}"
-       class="{% if page.tab == tab %}active{% endif %}">
-      {{ label }}
-    </a>
-  {% endfor %}
+  {% assign label = labels[forloop.index0] %}
+  {% if tab == 'map' %}
+    {% assign tab_url = '/' | append: page.level | append: '/' %}
+  {% else %}
+    {% assign tab_url = '/' | append: page.level | append: '/' | append: tab | append: '/' %}
+  {% endif %}
+  <a href="{{ tab_url | relative_url }}"
+     class="{% if page.tab == tab %}active{% endif %}">
+    {{ label }}
+  </a>
+{% endfor %}
 
 </nav>
