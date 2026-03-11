@@ -120,9 +120,5 @@
   { "id": 139, "source_code": "WB_WDI_SE_ADT_1524_LT_ZS", "source": "WB_WDI", "label": "Literacy Rate, Youth Total" },
   { "id": 87, "source_code": "WB_WDI_SE_ADT_1524_LT_FE_ZS", "source": "WB_WDI", "label": "Literacy Rate, Youth Female" },
   { "id": 95, "source_code": "WB_WDI_SE_ADT_1524_LT_MA_ZS", "source": "WB_WDI", "label": "Literacy Rate, Youth Male" },
-  { "id": 65, "source_code": "WB_WDI_SE_ADT_1524_LT_FM_ZS", "source": "WB_WDI", "label": "Literacy Rate, Youth Gender Parity Index" },
-  { "id": 237, "source_code": "4010", "source": "UDISE", "label": "Gross Enrolment Ratio (GER) by Gender and Level of School Education" },
-  { "id": 238, "source_code": "4011", "source": "UDISE", "label": "Net Enrolment Rate by Gender and Level of School Education" },
-  { "id": 239, "source_code": "4012", "source": "UDISE", "label": "Adjusted Net Enrolment Rate by Gender and Level of School Education" },
-  { "id": 246, "source_code": "4032", "source": "UDISE", "label": "Gender Parity Index of GER by Level of Education" }
+  { "id": 65, "source_code": "WB_WDI_SE_ADT_1524_LT_FM_ZS", "source": "WB_WDI", "label": "Literacy Rate, Youth Gender Parity Index" }
 ]

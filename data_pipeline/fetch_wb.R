@@ -27,6 +27,38 @@ map_indicators <- tribble(
   15,   "WB_SSGD_HDI_INDEX",            "WB_SSGD",     "HDI Index"
 )
 
+students_indicators <- tribble(
+  ~id,  ~source_code,                    ~database_id,  ~plot,    ~label,
+  # GER
+  151,  "WB_WDI_SE_PRE_ENRR",            "WB_WDI",      "GER",    "GER, Pre-Primary, Total",
+  148,  "WB_WDI_SE_PRE_ENRR_FE",         "WB_WDI",      "GER",    "GER, Pre-Primary, Female",
+  149,  "WB_WDI_SE_PRE_ENRR_MA",         "WB_WDI",      "GER",    "GER, Pre-Primary, Male",
+  89,   "WB_WDI_SE_PRM_ENRR",            "WB_WDI",      "GER",    "GER, Primary, Total",
+  110,  "WB_WDI_SE_PRM_ENRR_FE",         "WB_WDI",      "GER",    "GER, Primary, Female",
+  63,   "WB_WDI_SE_PRM_ENRR_MA",         "WB_WDI",      "GER",    "GER, Primary, Male",
+  77,   "WB_WDI_SE_SEC_ENRR",            "WB_WDI",      "GER",    "GER, Secondary, Total",
+  138,  "WB_WDI_SE_SEC_ENRR_FE",         "WB_WDI",      "GER",    "GER, Secondary, Female",
+  125,  "WB_WDI_SE_SEC_ENRR_MA",         "WB_WDI",      "GER",    "GER, Secondary, Male",
+  116,  "WB_WDI_SE_TER_ENRR",            "WB_WDI",      "GER",    "GER, Tertiary, Total",
+  104,  "WB_WDI_SE_TER_ENRR_FE",         "WB_WDI",      "GER",    "GER, Tertiary, Female",
+  126,  "WB_WDI_SE_TER_ENRR_MA",         "WB_WDI",      "GER",    "GER, Tertiary, Male",
+  # NER
+  168,  "WB_WDI_SE_PRM_NENR",            "WB_WDI",      "NER",    "NER, Primary, Total",
+  186,  "WB_WDI_SE_PRM_NENR_FE",         "WB_WDI",      "NER",    "NER, Primary, Female",
+  191,  "WB_WDI_SE_PRM_NENR_MA",         "WB_WDI",      "NER",    "NER, Primary, Male",
+  152,  "WB_WDI_SE_SEC_NENR",            "WB_WDI",      "NER",    "NER, Secondary, Total",
+  158,  "WB_WDI_SE_SEC_NENR_FE",         "WB_WDI",      "NER",    "NER, Secondary, Female",
+  171,  "WB_WDI_SE_SEC_NENR_MA",         "WB_WDI",      "NER",    "NER, Secondary, Male",
+  # Repetition
+  162,  "WB_WDI_SE_PRM_REPT_ZS",         "WB_WDI",      "REP",    "Repetition Rate, Primary, Total",
+  167,  "WB_WDI_SE_PRM_REPT_FE_ZS",      "WB_WDI",      "REP",    "Repetition Rate, Primary, Female",
+  161,  "WB_WDI_SE_PRM_REPT_MA_ZS",      "WB_WDI",      "REP",    "Repetition Rate, Primary, Male",
+  # Persistence
+  117,  "WB_WDI_SE_PRM_PRSL_ZS",         "WB_WDI",      "PERS",   "Persistence to Last Grade, Primary, Total",
+  73,   "WB_WDI_SE_PRM_PRSL_FE_ZS",      "WB_WDI",      "PERS",   "Persistence to Last Grade, Primary, Female",
+  56,   "WB_WDI_SE_PRM_PRSL_MA_ZS",      "WB_WDI",      "PERS",   "Persistence to Last Grade, Primary, Male"
+)
+
 # ── Fetch function 
 
 fetch_one <- function(id, source_code, database_id, label) {
@@ -128,3 +160,19 @@ map_raw |>
     years     = n_distinct(year),
     rows      = n()
   )
+
+# ── Fetch students indicators ──
+all_students <- list()
+for (i in seq_len(nrow(students_indicators))) {
+  row <- students_indicators[i, ]
+  df  <- fetch_one(row$id, row$source_code, row$database_id, row$label)
+  if (!is.null(df)) {
+    df$plot <- row$plot
+    all_students[[row$source_code]] <- df
+  }
+  Sys.sleep(0.5)
+}
+
+students_combined <- bind_rows(all_students)
+write_csv(students_combined, file.path(RAW_OUT, "students_raw.csv"))
+message("Students rows: ", nrow(students_combined))
