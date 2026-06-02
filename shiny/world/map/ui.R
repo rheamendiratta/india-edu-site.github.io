@@ -58,7 +58,7 @@ ui <- page_sidebar(
         style = "padding: 8px 12px 0 12px; font-size: 13px; font-weight: 500; color: #1a1a1a;",
         textOutput("map_title")
       ),
-      leafletOutput("choropleth", height = "620px")
+      leafletOutput("choropleth", height = "740px")
     ),
     card(
       style = "margin-top: 12px;",

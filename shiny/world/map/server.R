@@ -77,7 +77,7 @@ server <- function(input, output, session) {
               worldCopyJump  = FALSE
             )
     ) |>
-      fitBounds(-160, -60, 170, 80) |>
+      fitBounds(-130, -42, 155, 72) |>
       addProviderTiles(providers$CartoDB.PositronNoLabels)
   })
   
