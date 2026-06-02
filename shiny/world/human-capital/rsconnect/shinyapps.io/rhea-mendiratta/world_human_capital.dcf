@@ -5,6 +5,6 @@ account: rhea-mendiratta
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 17453141
-bundleId: 12072941
+bundleId: 12073246
 url: https://rhea-mendiratta.shinyapps.io/world_human_capital/
 version: 1
