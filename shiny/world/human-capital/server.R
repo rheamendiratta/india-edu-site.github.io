@@ -17,7 +17,7 @@ server <- function(input, output, session) {
   })
 
   # ── View toggle ───────────────────────────────────────────────────────────────
-  selected_view <- reactiveVal("bar")
+  selected_view <- reactiveVal("time")
 
   observeEvent(input$view_bar, {
     selected_view("bar")
@@ -44,77 +44,73 @@ server <- function(input, output, session) {
 
   # ── Indicator descriptions ────────────────────────────────────────────────────
   output$indicator_description <- renderUI({
-    tab         <- input$active_tab %||% "Human Capital Index"
-    label_style <- "font-size: 0.78rem; font-weight: 600; color: #c9a0a0; margin-bottom: 3px;"
-    desc_style  <- "font-size: 0.75rem; color: #A0A8C0; line-height: 1.5; margin-bottom: 4px;"
-    link_style  <- "color: #A0A8C0; font-size: 0.72rem; display: block; margin-bottom: 8px;"
+    tab   <- input$active_tab %||% "Human Capital Index"
+    lbl_s <- "font-size: 0.73rem; font-weight: 600; color: #e8ad4a; margin-bottom: 1px;"
+    val_s <- "font-size: 1.1rem; font-weight: 700; color: #fdfaf6; line-height: 1;"
+    sub_s <- "font-size: 0.67rem; color: #999993; margin-bottom: 8px;"
+    hr_s  <- "border-color: #2A2A2A; margin: 8px 0;"
 
-    india_latest <- function(plot_code, level, gender = "Total") {
-      yr <- hci_wb |>
-        filter(plot == plot_code, level == level, gender == gender,
+    india_val <- function(plot_code, level, gender = "Total", label = NULL, data_src = hci_wb) {
+      meta <- PLOT_META[[plot_code]]
+      if (is.null(meta)) return(NULL)
+      lbl <- if (!is.null(label)) label else meta$title
+      row <- data_src |>
+        filter(plot == plot_code, .data$level == level, .data$gender == gender,
                country_iso3 == "IND", !is.na(value)) |>
-        pull(year) |> max(na.rm = TRUE)
-      if (is.infinite(yr)) "No WB data for India" else paste0("Latest India WB: ", yr)
-    }
-
-    entry <- function(label, desc, url, plot_code, level) {
+        slice_max(year, n = 1, with_ties = FALSE)
+      if (nrow(row) == 0) return(NULL)
+      v <- if (row$value[1] >= 1000) formatC(row$value[1], format = "f", digits = 0, big.mark = ",")
+           else as.character(round(row$value[1], 2))
       tagList(
-        div(style = label_style, label),
-        div(style = desc_style, desc),
-        tags$a("Source: WB HCI/WDI", href = url, target = "_blank", style = link_style),
-        div(style = "font-size: 0.72rem; color: #A0A8C0; margin-bottom: 5px;",
-            india_latest(plot_code, level))
+        div(style = lbl_s, lbl),
+        div(style = val_s, v),
+        div(style = sub_s, paste0("WB \u00b7 ", row$year[1]))
       )
     }
 
-    if (tab == "Human Capital Index") {
-      tagList(
-        entry("Human Capital Index (HCI)",
-          "World Bank index (0–1) measuring human capital a child born today can expect to attain by age 18. Combines survival, schooling quality, and health. Gender split available.",
-          "https://www.worldbank.org/en/publication/human-capital",
-          "HCI", "Total"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        entry("Harmonized Test Scores",
-          "Country-average test scores harmonised across international and regional assessments (PISA, TIMSS, PIRLS, etc.) onto a common scale of 300–625.",
-          "https://databank.worldbank.org/metadataglossary/human-capital-index/series/HD.HCI.HLOS",
-          "HTS", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        entry("Learning-Adjusted Years of Schooling (LAYS)",
-          "Expected years of school weighted by learning quality. 12 years of poor schooling may yield fewer LAYS than 8 years of strong schooling.",
-          "https://databank.worldbank.org/metadataglossary/human-capital-index/series/HD.HCI.LAYS",
-          "LAYS", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        entry("Expected Years of Schooling",
-          "Number of years a school-age child can expect to spend in education. Input to the LAYS and HDI education component.",
-          "https://databank.worldbank.org/metadataglossary/human-capital-index/series/HD.HCI.EYRS",
-          "EYS", "Primary")
-      )
-    } else {
-      tagList(
-        entry("Human Development Index (HDI)",
-          "UNDP composite index combining life expectancy, education (expected & mean years of schooling), and GNI per capita. Scale 0–1.",
-          "https://hdr.undp.org/data-center/human-development-index",
-          "HDI", "Total")
-      )
+    items <- if (tab == "Human Capital Index") {
+      list(india_val("HCI",  "Total"),
+           india_val("HTS",  "Primary"),
+           india_val("LAYS", "Primary"),
+           india_val("EYS",  "Primary"))
+    } else if (tab == "Human Development Index") {
+      list(india_val("HDI", "Total"))
+    } else list()
+
+    items <- Filter(Negate(is.null), items)
+    if (length(items) == 0) return(NULL)
+
+    rows <- list()
+    for (i in seq_along(items)) {
+      rows[[length(rows) + 1]] <- items[[i]]
+      if (i < length(items)) rows[[length(rows) + 1]] <- tags$hr(style = hr_s)
     }
+    tagList(
+      div(style = "font-size: 0.65rem; color: #999993; letter-spacing: 0.06em; margin-bottom: 8px; text-transform: uppercase;",
+          "India \u00b7 Latest available"),
+      tagList(rows)
+    )
   })
 
+
   # ── Layout helpers ────────────────────────────────────────────────────────────
-  bar_layout <- function(p, y_label, x_range = NULL) {
+  bar_layout <- function(p, y_label, y_range = NULL) {
     p |>
       layout(
         paper_bgcolor = COL_NEARWHITE,
         plot_bgcolor  = COL_NEARWHITE,
         font          = list(family = "Inter", size = 11, color = COL_INDIGO),
-        margin        = list(l = 10, r = 20, t = 10, b = 50),
-        xaxis = list(
-          title     = list(text = y_label, font = list(size = 11, color = COL_INDIGO)),
-          range     = x_range,
-          showgrid  = TRUE, gridcolor = COL_BORDER,
-          zeroline  = TRUE, zerolinecolor = COL_BORDER,
-          tickfont  = list(size = 10), tickformat = ".2f"
+        margin        = list(l = 20, r = 20, t = 10, b = 60),
+        xaxis = list(showgrid = FALSE, zeroline = FALSE,
+                     tickfont = list(size = 9, color = COL_INDIGO),
+                     ticks = "", showline = FALSE),
+        yaxis = list(
+          title    = list(text = y_label, font = list(size = 11, color = COL_INDIGO)),
+          range    = y_range,
+          showgrid = TRUE, gridcolor = COL_BORDER,
+          zeroline = TRUE, zerolinecolor = COL_BORDER,
+          tickfont = list(size = 10), tickformat = ".2f"
         ),
-        yaxis = list(showticklabels = FALSE, showgrid = FALSE, categoryorder = "trace"),
         showlegend = FALSE
       ) |>
       config(displayModeBar = FALSE)
@@ -142,45 +138,47 @@ server <- function(input, output, session) {
 
   # ── Single-gender bar ─────────────────────────────────────────────────────────
   make_bar <- function(plot_code, .level, .gender, .year, india_col, y_label,
-                       x_range = NULL) {
+                       y_range = NULL) {
     df <- hci_wb |>
       filter(plot == plot_code, level == .level, gender == .gender,
-             year == .year, !is.na(value)) |>
-      group_by(country_iso3) |>
-      summarise(value = mean(value, na.rm = TRUE), .groups = "drop") |>
-      arrange(value) |>
-      mutate(
-        bar_col   = if_else(country_iso3 == "IND", india_col, COL_STEEL),
-        country_f = factor(country_iso3, levels = country_iso3)
-      )
+             year == .year, !is.na(value))
 
     if (nrow(df) == 0) {
       return(
         plotly_empty() |>
           layout(paper_bgcolor = COL_NEARWHITE, plot_bgcolor = COL_NEARWHITE,
-                 annotations = list(list(
-                   text = "Data not available for this year",
+                 annotations = list(list(text = "Data not available for this year",
                    x = 0.5, y = 0.5, xref = "paper", yref = "paper",
-                   showarrow = FALSE,
-                   font = list(size = 13, color = "#A0A8C0", family = "Inter")
+                   showarrow = FALSE, font = list(size = 13, color = "#999993", family = "Inter")
                  ))) |>
           config(displayModeBar = FALSE)
       )
     }
 
-    n_ctry    <- nrow(df)
-    tick_size <- if (n_ctry > 120) 6 else if (n_ctry > 80) 7 else 8
-
-    plot_ly(df, x = ~value, y = ~country_f, type = "bar", orientation = "h",
-            marker        = list(color = ~bar_col),
-            hovertemplate = "<b>%{y}</b>: %{x:.2f}<extra></extra>") |>
-      bar_layout(y_label, x_range) |>
-      layout(
-        margin = list(l = 42, r = 20, t = 10, b = 50),
-        yaxis  = list(title = "", showticklabels = TRUE,
-                      tickfont = list(size = tick_size, color = COL_INDIGO),
-                      showgrid = FALSE, categoryorder = "trace", automargin = TRUE)
+    df <- df |>
+      group_by(country_iso3) |>
+      summarise(value = mean(value, na.rm = TRUE), .groups = "drop") |>
+      arrange(value) |>
+      left_join(country_names, by = c("country_iso3" = "iso3c")) |>
+      mutate(
+        bar_col   = if_else(country_iso3 == "IND", india_col, COL_STEEL),
+        country_f = factor(country_iso3, levels = country_iso3),
+        label     = coalesce(country_name, country_iso3)
       )
+
+    n <- nrow(df)
+    labeled <- unique(c(as.character(df$country_f[1]),
+                        if ("IND" %in% df$country_iso3) "IND",
+                        as.character(df$country_f[n])))
+    t_text  <- df$label[match(labeled, df$country_iso3)]
+
+    plot_ly(df, x = ~country_f, y = ~value, type = "bar",
+            marker        = list(color = ~bar_col),
+            text          = ~label,
+            hovertemplate = "<b>%{text}</b>: %{y:.2f}<extra></extra>") |>
+      bar_layout(y_label, y_range = y_range) |>
+      layout(xaxis = list(tickmode = "array", tickvals = labeled,
+                          ticktext = t_text, tickangle = 0))
   }
 
   # ── Single-gender line ────────────────────────────────────────────────────────
@@ -219,29 +217,15 @@ server <- function(input, output, session) {
     if (!has_gender || mode == "total") {
       make_bar(plot_code, level, "Total", year, COL_ROSE, meta$y_label)
     } else {
-      df_f <- hci_wb |> filter(plot == plot_code, level == level, gender == "Female",
-                                year == year, !is.na(value))
-      df_m <- hci_wb |> filter(plot == plot_code, level == level, gender == "Male",
-                                year == year, !is.na(value))
-      all_vals <- c(df_f$value, df_m$value)
-      if (length(all_vals) == 0 || all(is.na(all_vals))) {
-        x_range <- NULL
-      } else {
-        rng <- range(all_vals, na.rm = TRUE)
-        pad <- diff(rng) * 0.08
-        x_range <- c(rng[1] - pad, rng[2] + pad)
-      }
-      pf <- make_bar(plot_code, level, "Female", year, COL_FEMALE, meta$y_label, x_range)
-      pm <- make_bar(plot_code, level, "Male",   year, COL_MALE,   meta$y_label, x_range)
+      pf <- make_bar(plot_code, level, "Female", year, COL_FEMALE, meta$y_label)
+      pm <- make_bar(plot_code, level, "Male",   year, COL_MALE,   meta$y_label)
       subplot(pf, pm, nrows = 1, shareY = TRUE, titleX = TRUE) |>
-        layout(
-          annotations = list(
-            list(text = "Female", x = 0.22, y = 1.04, xref = "paper", yref = "paper",
-                 showarrow = FALSE, font = list(size = 12, color = COL_FEMALE)),
-            list(text = "Male",   x = 0.78, y = 1.04, xref = "paper", yref = "paper",
-                 showarrow = FALSE, font = list(size = 12, color = COL_MALE))
-          )
-        ) |>
+        layout(annotations = list(
+          list(text = "Female", x = 0.22, y = 1.04, xref = "paper", yref = "paper",
+               showarrow = FALSE, font = list(size = 12, color = COL_FEMALE)),
+          list(text = "Male",   x = 0.78, y = 1.04, xref = "paper", yref = "paper",
+               showarrow = FALSE, font = list(size = 12, color = COL_MALE))
+        )) |>
         config(displayModeBar = FALSE)
     }
   }

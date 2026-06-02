@@ -1,15 +1,16 @@
 /* ── Site Header ── */
 .site-header {
-  background-color: #161929;
+  background-color: #fdfaf6;
   padding: 0.75rem 2rem;
-  border-bottom: 1px solid #2e3250;
+  border-bottom: 1px solid #e8e4dc;
 }
 
 .site-header-title {
-  color: #e8e9f3;
+  color: #1a1a1a;
   font-size: 1.1rem;
   font-weight: 500;
   letter-spacing: 0.03em;
+  font-family: 'Delphi', Georgia, serif; /* swap CDN link in dashboard.html when Delphi is available */
 }
 
 /* ── Reset & Base ── */
@@ -21,21 +22,21 @@
 
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-feature-settings: 'liga' 1, 'calt' 1; /* Inter's nice ligatures */
-  color: #2d2d3a;
-  background-color: #fafaf8;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+  color: #1a1a1a;
+  background-color: #fdfaf6;
 }
 
 /* ── Top Nav: World / India / States ── */
 .top-nav {
   display: flex;
   gap: 0;
-  background-color: #2e3250;
+  background-color: #ede9e2;
   padding: 0 2rem;
 }
 
 .top-nav a {
-  color: #b8bdd6;
+  color: #555550;
   text-decoration: none;
   padding: 1rem 1.5rem;
   display: block;
@@ -46,26 +47,26 @@ body {
 }
 
 .top-nav a:hover {
-  color: #e8e9f3;
-  background-color: #373c5e;
+  color: #1a1a1a;
+  background-color: #e3dfd8;
 }
 
 .top-nav a.active {
-  color: #fff;
-  border-bottom: 3px solid #c9a0a0;
+  color: #1a1a1a;
+  border-bottom: 3px solid #e8ad4a;
 }
 
 /* ── Tab Nav: Map / Students / Teachers etc ── */
 .tab-nav {
   display: flex;
   gap: 0;
-  background-color: #f0eeea;
-  border-bottom: 2px solid #ddd9d2;
+  background-color: #fdfaf6;
+  border-bottom: 1px solid #e8e4dc;
   padding: 0 2rem;
 }
 
 .tab-nav a {
-  color: #6b6676;
+  color: #666660;
   text-decoration: none;
   padding: 0.75rem 1.25rem;
   display: block;
@@ -73,14 +74,14 @@ body {
 }
 
 .tab-nav a:hover {
-  color: #2e3250;
-  background-color: #e5e2dc;
+  color: #1a1a1a;
+  background-color: #f2efe9;
 }
 
 .tab-nav a.active {
-  color: #2e3250;
+  color: #1a1a1a;
   font-weight: 600;
-  border-bottom: 3px solid #c9a0a0;
+  border-bottom: 3px solid #e8ad4a;
 }
 
 /* ── Main Content Area ── */

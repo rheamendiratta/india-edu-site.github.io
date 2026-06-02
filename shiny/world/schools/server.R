@@ -3,7 +3,7 @@
 server <- function(input, output, session) {
 
   # ── View toggle ────────────────────────────────────────────────────────────
-  selected_view <- reactiveVal("bar")
+  selected_view <- reactiveVal("time")
   observeEvent(input$view_bar, {
     selected_view("bar")
     shinyjs::addClass("view_bar",     "active")
@@ -54,55 +54,73 @@ server <- function(input, output, session) {
 
   # ── Sidebar indicator descriptions ────────────────────────────────────────
   output$indicator_description <- renderUI({
-    tab        <- input$active_tab %||% "System Structure"
-    desc_style  <- "font-size: 0.75rem; color: #A0A8C0; line-height: 1.5; margin-bottom: 4px;"
-    label_style <- "font-size: 0.78rem; font-weight: 600; color: #c9a0a0; margin-bottom: 3px;"
-    link_style  <- "color: #A0A8C0; font-size: 0.72rem; display: block; margin-bottom: 8px;"
-    hr_style    <- "border-color: #3D4268; margin: 12px 0;"
+    tab   <- input$active_tab %||% "System Structure"
+    lbl_s <- "font-size: 0.73rem; font-weight: 600; color: #e8ad4a; margin-bottom: 1px;"
+    val_s <- "font-size: 1.1rem; font-weight: 700; color: #fdfaf6; line-height: 1;"
+    sub_s <- "font-size: 0.67rem; color: #999993; margin-bottom: 8px;"
+    hr_s  <- "border-color: #2A2A2A; margin: 8px 0;"
 
-    entry <- function(label, desc, url) tagList(
-      div(style = label_style, label),
-      div(style = desc_style, desc),
-      tags$a("Source: WDI", href = url, target = "_blank", style = link_style)
-    )
-
-    if (tab == "System Structure") {
+    india_wb <- function(plot_code, level) {
+      meta <- PLOT_META[[plot_code]]
+      if (is.null(meta)) return(NULL)
+      row <- schools_wb |>
+        filter(plot == plot_code, .data$level == level, gender == "Total",
+               country_iso3 == "IND", !is.na(value)) |>
+        slice_max(year, n = 1, with_ties = FALSE)
+      if (nrow(row) == 0) return(NULL)
       tagList(
-        entry("Education System Duration",
-          "Official duration in years of each level of education (pre-primary, primary, secondary) and the compulsory schooling span as defined by national law.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.COM.DURS"),
-        tags$hr(style = hr_style),
-        entry("Private Enrolment Share",
-          "Share of pupils enrolled in private institutions at primary and secondary levels. India UDISE 2024-25 overlay shown as a dashed teal line.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.PRIV.ZS")
-      )
-    } else if (tab == "School Infrastructure") {
-      tagList(
-        div(style = label_style, "India: Schools by Management"),
-        div(style = desc_style,
-            "Distribution of schools across management types (Government, Aided, Private Unaided, Other) over time. Source: UDISE+."),
-        tags$a("Source: UDISE+", href = "https://udiseplus.gov.in", target = "_blank", style = link_style)
-      )
-    } else {
-      tagList(
-        entry("PISA School Metrics",
-          "School-level indicators from the PISA School Questionnaire: student-teacher ratio, staff shortage index, government funding share, and % public schools. India does not participate in PISA.",
-          "https://www.oecd.org/pisa/")
+        div(style = lbl_s, meta$title),
+        div(style = val_s, round(row$value[1], 1)),
+        div(style = sub_s, paste0("WB · ", row$year[1]))
       )
     }
+
+    if (tab == "System Structure") {
+      items <- list(
+        india_wb("SCHED_DUR", input$dur_level %||% "Primary"),
+        india_wb("PRIV",      input$priv_level %||% "Primary")
+      )
+      items <- Filter(Negate(is.null), items)
+      if (length(items) == 0) return(
+        div(style = lbl_s, "UDISE data shown in School Infrastructure tab.")
+      )
+    } else if (tab == "School Infrastructure") {
+      return(div(
+        div(style = "font-size: 0.65rem; color: #999993; letter-spacing: 0.06em; margin-bottom: 8px; text-transform: uppercase;",
+            "India (UDISE+)"),
+        div(style = lbl_s, "Schools by Management Type"),
+        div(style = sub_s, "Government · Private · Aided")
+      ))
+    } else {
+      return(div(style = sub_s, "India does not participate in PISA."))
+    }
+
+    rows <- list()
+    for (i in seq_along(items)) {
+      rows[[length(rows) + 1]] <- items[[i]]
+      if (i < length(items)) rows[[length(rows) + 1]] <- tags$hr(style = hr_s)
+    }
+    tagList(
+      div(style = "font-size: 0.65rem; color: #999993; letter-spacing: 0.06em; margin-bottom: 8px; text-transform: uppercase;",
+          "India · Latest available"),
+      tagList(rows)
+    )
   })
 
   # ── Layout helpers ─────────────────────────────────────────────────────────
-  bar_layout <- function(p, y_label) {
+  bar_layout <- function(p, y_label, y_range = NULL) {
     p |> layout(
       paper_bgcolor = COL_NEARWHITE, plot_bgcolor = COL_NEARWHITE,
       font   = list(family = "Inter", size = 11, color = COL_INDIGO),
-      margin = list(l = 10, r = 20, t = 10, b = 50),
-      xaxis  = list(title = list(text = y_label, font = list(size = 11)),
+      margin = list(l = 20, r = 20, t = 10, b = 60),
+      xaxis  = list(showgrid = FALSE, zeroline = FALSE,
+                    tickfont = list(size = 9, color = COL_INDIGO),
+                    ticks = "", showline = FALSE),
+      yaxis  = list(title = list(text = y_label, font = list(size = 11)),
+                    range = y_range,
                     showgrid = TRUE, gridcolor = COL_BORDER,
                     zeroline = TRUE, zerolinecolor = COL_BORDER,
                     tickfont = list(size = 10), tickformat = ".1f"),
-      yaxis  = list(showticklabels = FALSE, showgrid = FALSE, categoryorder = "trace"),
       showlegend = FALSE
     ) |> config(displayModeBar = FALSE)
   }
@@ -130,7 +148,7 @@ server <- function(input, output, session) {
           text = msg, x = 0.5, y = 0.5,
           xref = "paper", yref = "paper",
           showarrow = FALSE,
-          font = list(size = 13, color = "#A0A8C0", family = "Inter")
+          font = list(size = 13, color = "#999993", family = "Inter")
         ))
       ) |> config(displayModeBar = FALSE)
   }
@@ -146,22 +164,28 @@ server <- function(input, output, session) {
       summarise(value = mean(.data[[value_col]], na.rm = TRUE), .groups = "drop") |>
       rename(country_iso3 = 1) |>
       arrange(if (reverse) desc(value) else value) |>
+      left_join(country_names, by = c("country_iso3" = "iso3c")) |>
       mutate(
         bar_col   = if_else(country_iso3 == "IND", COL_ROSE, COL_STEEL),
-        country_f = factor(country_iso3, levels = country_iso3)
+        country_f = factor(country_iso3, levels = country_iso3),
+        label     = coalesce(country_name, country_iso3)
       )
 
     if (nrow(df) == 0) return(empty_plot())
 
-    tick_size <- if (nrow(df) > 120) 6 else if (nrow(df) > 80) 7 else 8
-    plot_ly(df, x = ~value, y = ~country_f, type = "bar", orientation = "h",
+    n <- nrow(df)
+    labeled <- unique(c(as.character(df$country_f[1]),
+                        if ("IND" %in% df$country_iso3) "IND",
+                        as.character(df$country_f[n])))
+    t_text  <- df$label[match(labeled, df$country_iso3)]
+
+    plot_ly(df, x = ~country_f, y = ~value, type = "bar",
             marker = list(color = ~bar_col),
-            hovertemplate = "<b>%{y}</b>: %{x:.1f}<extra></extra>") |>
+            text = ~label,
+            hovertemplate = "<b>%{text}</b>: %{y:.1f}<extra></extra>") |>
       bar_layout(y_label) |>
-      layout(margin = list(l = 42, r = 20, t = 10, b = 50),
-             yaxis = list(title = "", showticklabels = TRUE,
-                          tickfont = list(size = tick_size, color = COL_INDIGO),
-                          showgrid = FALSE, categoryorder = "trace", automargin = TRUE))
+      layout(xaxis = list(tickmode = "array", tickvals = labeled,
+                          ticktext = t_text, tickangle = 0))
   }
 
   # ── make_line: grey country lines + India WB line + optional UDISE overlay ─

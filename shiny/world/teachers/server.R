@@ -18,7 +18,7 @@ server <- function(input, output, session) {
   })
 
   # ── View toggle ────────────────────────────────────────────────────────────
-  selected_view <- reactiveVal("bar")
+  selected_view <- reactiveVal("time")
   observeEvent(input$view_bar, {
     selected_view("bar")
     shinyjs::addClass("view_bar",     "active")
@@ -48,60 +48,69 @@ server <- function(input, output, session) {
 
   # ── Sidebar descriptions ───────────────────────────────────────────────────
   output$indicator_description <- renderUI({
-    tab  <- input$active_tab %||% "Teacher Workforce"
-    desc_style  <- "font-size: 0.75rem; color: #A0A8C0; line-height: 1.5; margin-bottom: 4px;"
-    label_style <- "font-size: 0.78rem; font-weight: 600; color: #c9a0a0; margin-bottom: 3px;"
-    link_style  <- "color: #A0A8C0; font-size: 0.72rem; display: block; margin-bottom: 8px;"
-    hr_style    <- "border-color: #3D4268; margin: 12px 0;"
+    tab   <- input$active_tab %||% "Teacher Workforce"
+    lbl_s <- "font-size: 0.73rem; font-weight: 600; color: #e8ad4a; margin-bottom: 1px;"
+    val_s <- "font-size: 1.1rem; font-weight: 700; color: #fdfaf6; line-height: 1;"
+    sub_s <- "font-size: 0.67rem; color: #999993; margin-bottom: 8px;"
+    hr_s  <- "border-color: #2A2A2A; margin: 8px 0;"
 
-    entry <- function(label, desc, url) tagList(
-      div(style = label_style, label),
-      div(style = desc_style, desc),
-      tags$a("Source: WDI", href = url, target = "_blank", style = link_style)
-    )
-
-    if (tab == "Teacher Workforce") {
+    india_val <- function(plot_code, level, gender = "Total", label = NULL, data_src = teachers_wb) {
+      meta <- PLOT_META[[plot_code]]
+      if (is.null(meta)) return(NULL)
+      lbl <- if (!is.null(label)) label else meta$title
+      row <- data_src |>
+        filter(plot == plot_code, .data$level == level, .data$gender == gender,
+               country_iso3 == "IND", !is.na(value)) |>
+        slice_max(year, n = 1, with_ties = FALSE)
+      if (nrow(row) == 0) return(NULL)
+      v <- if (row$value[1] >= 1000) formatC(row$value[1], format = "f", digits = 0, big.mark = ",")
+           else as.character(round(row$value[1], 2))
       tagList(
-        entry("Teachers (Number)",
-          "Total number of teachers at each level of education (headcount). Larger countries will naturally have more teachers.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.TCHR"),
-        tags$hr(style = hr_style),
-        entry("Teachers, % Female",
-          "Share of the teaching workforce that is female. Shows gender composition of the profession by education level.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.TCHR.FE.ZS")
-      )
-    } else if (tab == "Teacher Training") {
-      entry("Trained Teachers (%)",
-        "% of teachers who have received the minimum organised teacher training required for teaching at a given level. Gender split shows whether training is equitably distributed.",
-        "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.TCAQ.ZS")
-    } else if (tab == "Pupil-Teacher Ratio") {
-      entry("Pupil-Teacher Ratio (PTR)",
-        "Average number of pupils per teacher at a given education level. Lower values indicate smaller class sizes and better teacher availability. India UDISE overlay shown as a dashed line.",
-        "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.ENRL.TC.ZS")
-    } else {
-      tagList(
-        entry("% Female — All Levels",
-          "Female share of the teaching workforce across all education levels in a single view.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.TCHR.FE.ZS"),
-        tags$hr(style = hr_style),
-        entry("Trained — All Levels",
-          "% trained teachers across all levels, for direct level-to-level comparison.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.TCAQ.ZS")
+        div(style = lbl_s, lbl),
+        div(style = val_s, v),
+        div(style = sub_s, paste0("WB \u00b7 ", row$year[1]))
       )
     }
+
+    items <- if (tab == "Teacher Workforce") {
+      list(india_val("TCHR_FEM", input$fem_level %||% "Primary"),
+           india_val("TCHR_NUM", input$num_level %||% "Primary"))
+    } else if (tab == "Teacher Training") {
+      list(india_val("TCHR_TRN", input$trn_level %||% "Primary"))
+    } else if (tab == "Pupil-Teacher Ratio") {
+      list(india_val("TCHR_PTR", input$ptr_level %||% "Primary"))
+    } else list()
+
+    items <- Filter(Negate(is.null), items)
+    if (length(items) == 0) return(NULL)
+
+    rows <- list()
+    for (i in seq_along(items)) {
+      rows[[length(rows) + 1]] <- items[[i]]
+      if (i < length(items)) rows[[length(rows) + 1]] <- tags$hr(style = hr_s)
+    }
+    tagList(
+      div(style = "font-size: 0.65rem; color: #999993; letter-spacing: 0.06em; margin-bottom: 8px; text-transform: uppercase;",
+          "India \u00b7 Latest available"),
+      tagList(rows)
+    )
   })
 
+
   # ── Layout helpers ─────────────────────────────────────────────────────────
-  bar_layout <- function(p, y_label) {
+  bar_layout <- function(p, y_label, y_range = NULL) {
     p |> layout(
       paper_bgcolor = COL_NEARWHITE, plot_bgcolor = COL_NEARWHITE,
       font   = list(family = "Inter", size = 11, color = COL_INDIGO),
-      margin = list(l = 10, r = 20, t = 10, b = 50),
-      xaxis  = list(title = list(text = y_label, font = list(size = 11)),
+      margin = list(l = 20, r = 20, t = 10, b = 60),
+      xaxis  = list(showgrid = FALSE, zeroline = FALSE,
+                    tickfont = list(size = 9, color = COL_INDIGO),
+                    ticks = "", showline = FALSE),
+      yaxis  = list(title = list(text = y_label, font = list(size = 11)),
+                    range = y_range,
                     showgrid = TRUE, gridcolor = COL_BORDER,
                     zeroline = TRUE, zerolinecolor = COL_BORDER,
                     tickfont = list(size = 10), tickformat = ".1f"),
-      yaxis  = list(showticklabels = FALSE, showgrid = FALSE, categoryorder = "trace"),
       showlegend = FALSE
     ) |> config(displayModeBar = FALSE)
   }
@@ -122,34 +131,42 @@ server <- function(input, output, session) {
   }
 
   # ── Single bar chart (always Total for non-gender plots) ───────────────────
-  make_bar <- function(plot_code, .level, .gender, .year, reverse, col, y_label) {
+  make_bar <- function(plot_code, .level, .gender, .year, reverse, col, y_label, y_range = NULL) {
     df <- teachers_wb |>
       filter(plot == plot_code, level == .level, gender == .gender,
-             year == .year, !is.na(value)) |>
-      group_by(country_iso3) |>
-      summarise(value = mean(value, na.rm = TRUE), .groups = "drop") |>
-      arrange(if (reverse) desc(value) else value) |>
-      mutate(bar_col   = if_else(country_iso3 == "IND", col, COL_STEEL),
-             country_f = factor(country_iso3, levels = country_iso3))
+             year == .year, !is.na(value))
 
     if (nrow(df) == 0) {
       return(plotly_empty() |>
         layout(paper_bgcolor = COL_NEARWHITE, plot_bgcolor = COL_NEARWHITE,
                annotations = list(list(text = "No data available for this selection",
                  x = 0.5, y = 0.5, xref = "paper", yref = "paper",
-                 showarrow = FALSE, font = list(size = 13, color = "#A0A8C0", family = "Inter")))) |>
+                 showarrow = FALSE, font = list(size = 13, color = "#999993", family = "Inter")))) |>
         config(displayModeBar = FALSE))
     }
 
-    tick_size <- if (nrow(df) > 120) 6 else if (nrow(df) > 80) 7 else 8
-    plot_ly(df, x = ~value, y = ~country_f, type = "bar", orientation = "h",
+    df <- df |>
+      group_by(country_iso3) |>
+      summarise(value = mean(value, na.rm = TRUE), .groups = "drop") |>
+      arrange(if (reverse) desc(value) else value) |>
+      left_join(country_names, by = c("country_iso3" = "iso3c")) |>
+      mutate(bar_col   = if_else(country_iso3 == "IND", col, COL_STEEL),
+             country_f = factor(country_iso3, levels = country_iso3),
+             label     = coalesce(country_name, country_iso3))
+
+    n <- nrow(df)
+    labeled <- unique(c(as.character(df$country_f[1]),
+                        if ("IND" %in% df$country_iso3) "IND",
+                        as.character(df$country_f[n])))
+    t_text  <- df$label[match(labeled, df$country_iso3)]
+
+    plot_ly(df, x = ~country_f, y = ~value, type = "bar",
             marker = list(color = ~bar_col),
-            hovertemplate = "<b>%{y}</b>: %{x:.1f}<extra></extra>") |>
-      bar_layout(y_label) |>
-      layout(margin = list(l = 42, r = 20, t = 10, b = 50),
-             yaxis = list(title = "", showticklabels = TRUE,
-                          tickfont = list(size = tick_size, color = COL_INDIGO),
-                          showgrid = FALSE, categoryorder = "trace", automargin = TRUE))
+            text = ~label,
+            hovertemplate = "<b>%{text}</b>: %{y:.1f}<extra></extra>") |>
+      bar_layout(y_label, y_range = y_range) |>
+      layout(xaxis = list(tickmode = "array", tickvals = labeled,
+                          ticktext = t_text, tickangle = 0))
   }
 
   # ── Render bar: total or gender split ──────────────────────────────────────
@@ -162,12 +179,6 @@ server <- function(input, output, session) {
     if (mode == "total") {
       make_bar(plot_code, level, "Total", year, reverse, col, meta$y_label)
     } else {
-      df_f <- teachers_wb |> filter(plot == plot_code, level == level, gender == "Female", year == year)
-      df_m <- teachers_wb |> filter(plot == plot_code, level == level, gender == "Male",   year == year)
-      vals  <- c(df_f$value, df_m$value)
-      rng   <- if (length(vals) > 0 && !all(is.na(vals))) {
-        r <- range(vals, na.rm = TRUE); pad <- diff(r) * 0.08; c(r[1] - pad, r[2] + pad)
-      } else NULL
       pf <- make_bar(plot_code, level, "Female", year, reverse, COL_FEMALE, meta$y_label)
       pm <- make_bar(plot_code, level, "Male",   year, reverse, COL_MALE,   meta$y_label)
       subplot(pf, pm, nrows = 1, shareY = TRUE, titleX = TRUE) |>
@@ -337,7 +348,7 @@ server <- function(input, output, session) {
         margin = list(l = 42, r = 20, t = 10, b = 50),
         annotations = list(list(text = paste("Latest year:", yr_max), x = 1, y = -0.08,
           xref = "paper", yref = "paper", showarrow = FALSE,
-          font = list(size = 9, color = "#A0A8C0"), xanchor = "right")),
+          font = list(size = 9, color = "#999993"), xanchor = "right")),
         yaxis = list(title = "", showticklabels = TRUE,
                      tickfont = list(size = 8, color = COL_INDIGO),
                      showgrid = FALSE, categoryorder = "trace", automargin = TRUE)

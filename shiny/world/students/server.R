@@ -17,8 +17,8 @@ server <- function(input, output, session) {
   })
   
   # ── View toggle ───────────────────────────────────────────────────────────────
-  selected_view <- reactiveVal("bar")
-  
+  selected_view <- reactiveVal("time")
+
   observeEvent(input$view_bar, {
     selected_view("bar")
     shinyjs::addClass("view_bar",     "active")
@@ -58,337 +58,93 @@ server <- function(input, output, session) {
   
   # ── Indicator descriptions ────────────────────────────────────────────────────
   output$indicator_description <- renderUI({
-    tab          <- input$active_tab %||% "Enrolment & Access"
-    is_enrolment  <- tab == "Enrolment & Access"
-    is_flow       <- tab == "Completion, Persistence & Flow"
-    is_learning   <- tab == "Learning Outcomes"
-    is_attainment <- tab == "Educational Attainment"
-    is_literacy   <- tab == "Literacy"
-    gmode        <- gender_mode()
-    genders      <- if (gmode == "split") c("Female", "Male") else "Total"
-    
-    if (is_literacy) {
-      return(tagList(
-        sidebar_entry("Adult Literacy Rate (15+)",
-          "% of adults aged 15 and over who can read and write a short simple statement about everyday life.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.ADT.LITR.ZS",
-          "LIT_ADT", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("Youth Literacy Rate (15–24)",
-          "% of people aged 15–24 who can read and write. A leading indicator of education system effectiveness in recent decades.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.ADT.1524.LT.ZS",
-          "LIT_YTH", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("Youth Literacy Gender Parity Index",
-          "Female-to-male ratio of youth literacy rates. Values below 1 indicate girls are less likely to be literate; above 1 indicates the reverse.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.ADT.1524.LT.FM.ZS",
-          "LIT_YTH_GPI", "Primary")
-      ))
+    tab   <- input$active_tab %||% "Enrolment & Access"
+    lbl_s <- "font-size: 0.73rem; font-weight: 600; color: #e8ad4a; margin-bottom: 1px;"
+    val_s <- "font-size: 1.1rem; font-weight: 700; color: #fdfaf6; line-height: 1;"
+    sub_s <- "font-size: 0.67rem; color: #999993; margin-bottom: 8px;"
+    hr_s  <- "border-color: #2A2A2A; margin: 8px 0;"
+
+    india_val <- function(plot_code, level, gender = "Total", label = NULL) {
+      meta <- PLOT_META[[plot_code]]
+      if (is.null(meta)) return(NULL)
+      lbl <- if (!is.null(label)) label else meta$title
+      row <- students_wb |>
+        filter(plot == plot_code, .data$level == level, .data$gender == gender,
+               country_iso3 == "IND", !is.na(value)) |>
+        slice_max(year, n = 1, with_ties = FALSE)
+      if (nrow(row) == 0) return(NULL)
+      v <- if (row$value[1] >= 1000) formatC(row$value[1], format = "f", digits = 0, big.mark = ",")
+           else as.character(round(row$value[1], 1))
+      tagList(
+        div(style = lbl_s, lbl),
+        div(style = val_s, v),
+        div(style = sub_s, paste0("WB \u00b7 ", row$year[1]))
+      )
     }
 
-    if (is_attainment) {
-      return(tagList(
-        sidebar_entry("Primary Attainment",
-          "% of adults 25+ who have completed at least primary education. A cumulative measure — includes all higher attainment levels.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.CUAT.ZS",
-          "ATTAIN_PRM", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("Lower Secondary Attainment",
-          "% of adults 25+ with at least lower secondary education (e.g. middle school / Grade 9). Threshold for basic economic participation.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.SEC.CUAT.LO.ZS",
-          "ATTAIN_LSEC", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("Upper Secondary Attainment",
-          "% of adults 25+ with at least upper secondary (e.g. Grade 12 / A-levels). Often the threshold for skilled employment.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.SEC.CUAT.UP.ZS",
-          "ATTAIN_USEC", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("Tertiary Attainment (Bachelor's+)",
-          "% of adults 25+ with at least a Bachelor's degree or equivalent. Measures the stock of higher-educated human capital.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.TER.CUAT.BA.ZS",
-          "ATTAIN_TER", "Primary")
-      ))
-    }
+    items <- if (tab == "Enrolment & Access") {
+      list(india_val("GER",  input$ger_level  %||% "Primary"),
+           india_val("NER",  input$ner_level  %||% "Primary"),
+           india_val("GPI",  input$gpi_level  %||% "Primary"),
+           india_val("OOS",  input$oos_level  %||% "Primary"),
+           india_val("PRIV", input$priv_level %||% "Primary"))
+    } else if (tab == "Completion, Persistence & Flow") {
+      list(india_val("COMPL_PRM",  "Primary"),
+           india_val("COMPL_LSEC", "Lower Secondary"),
+           india_val("PERS",       "Primary"),
+           india_val("REP",        "Primary"))
+    } else if (tab == "Learning Outcomes") {
+      list(india_val("HTS",  "Primary"),
+           india_val("LAYS", "Primary"),
+           india_val("EYS",  "Primary"),
+           india_val("LP",   "Primary"))
+    } else if (tab == "Educational Attainment") {
+      list(india_val("ATTAIN_PRM",  "Primary"),
+           india_val("ATTAIN_LSEC", "Primary"),
+           india_val("ATTAIN_USEC", "Primary"),
+           india_val("ATTAIN_TER",  "Primary"))
+    } else if (tab == "Literacy") {
+      list(india_val("LIT_ADT", "Primary"),
+           india_val("LIT_YTH", "Primary"))
+    } else list()
 
-    if (is_learning) {
-      return(tagList(
-        sidebar_entry("Harmonized Test Scores",
-          "Average harmonised test score (scale 300–625) combining assessments across subjects and grades. Higher = better learning outcomes.",
-          "https://databank.worldbank.org/metadataglossary/human-capital-index/series/HD.HCI.HLOS",
-          "HTS", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("Learning-Adjusted Years of Schooling (LAYS)",
-          "Expected years of school discounted by quality of learning. A child attending 12 years of poor-quality school may accumulate fewer LAYS than one in 8 years of strong schooling.",
-          "https://databank.worldbank.org/metadataglossary/human-capital-index/series/HD.HCI.LAYS",
-          "LAYS", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("Expected Years of Schooling",
-          "Number of years a school-age child can expect to spend in education (unadjusted for quality). Input to LAYS and HDI education component.",
-          "https://databank.worldbank.org/metadataglossary/human-capital-index/series/HD.HCI.EYRS",
-          "EYS", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("Learning Poverty",
-          "% of children who cannot read a simple text by age 10. Combines in-school learning deprivation with out-of-school status. Lower is better.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.LPV.PRIM",
-          "LP", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("Learning Deprivation",
-          "% of primary-school-age children in school who have not achieved minimum reading proficiency. The in-school component of Learning Poverty. Lower is better.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.LPV.PRIM.LD",
-          "LD", "Primary"),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry("School Deprivation",
-          "% of primary-school-age children who are out of school. The enrolment component of Learning Poverty. Lower is better.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.LPV.PRIM.SD",
-          "SD", "Primary")
-      ))
-    }
+    items <- Filter(Negate(is.null), items)
+    if (length(items) == 0) return(NULL)
 
-    if (is_enrolment) {
-      lev1  <- input$ger_level %||% "Primary"
-      lev2  <- input$ner_level %||% "Primary"
-      udise_lev1 <- switch(lev1,
-                           "Primary"     = "Preparatory",
-                           "Secondary"   = "Secondary",
-                           "Pre-primary" = "Foundational",
-                           NULL)
-      udise_lev2 <- switch(lev2,
-                           "Primary"   = "Preparatory",
-                           "Secondary" = "Secondary",
-                           NULL)
-    } else {
-      plot1 <- "REP";  plot2 <- "PERS"
-      lev1  <- "Primary"; lev2 <- "Primary"
-      udise_lev1 <- "Preparatory"; udise_lev2 <- "Preparatory"
-      lbl1  <- "Repetition Rate"
-      lbl2  <- "Persistence to Last Grade"
-      desc1 <- "% of pupils enrolled in a grade who repeat that grade the following year. Lower = better internal efficiency."
-      desc2 <- "% of Grade 1 entrants who reach the last grade of primary. Based on the reconstructed cohort method."
-      src1  <- "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.REPT.ZS"
-      src2  <- "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.PRSL.ZS"
+    rows <- list()
+    for (i in seq_along(items)) {
+      rows[[length(rows) + 1]] <- items[[i]]
+      if (i < length(items)) rows[[length(rows) + 1]] <- tags$hr(style = hr_s)
     }
-    
-    desc_style  <- "font-size: 0.75rem; color: #A0A8C0; line-height: 1.5; margin-bottom: 4px;"
-    label_style <- "font-size: 0.78rem; font-weight: 600; color: #c9a0a0; margin-bottom: 3px;"
-    link_style  <- "color: #A0A8C0; font-size: 0.72rem; display: block; margin-bottom: 8px;"
-    
-    # India WB latest year for a plot/level
-    wb_latest <- function(plot_code, level) {
-      yr <- students_wb |>
-        filter(plot == plot_code, level == level,
-               gender == "Total", country_iso3 == "IND", !is.na(value)) |>
-        pull(year) |> max(na.rm = TRUE)
-      if (is.infinite(yr)) "No WB data" else paste0("Latest India WB: ", yr)
-    }
-    
-    # UDISE callout box — Tab 1 indicators (udise_tab1, new schema)
-    make_udise_box_t1 <- function(indicator_id, udise_level, genders) {
-      if (is.null(udise_level)) return(NULL)
-      rows <- lapply(genders, function(g) {
-        row <- udise_tab1 |>
-          filter(indicator_id == indicator_id, level == udise_level,
-                 gender == g, !is.na(value)) |>
-          slice_max(year, n = 1, with_ties = FALSE)
-        if (nrow(row) == 0) return(NULL)
-        g_col <- if (g == "Female") COL_FEMALE else if (g == "Male") COL_MALE else COL_OFFWHITE
-        yr    <- row$year[1]
-        div(style = "display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;",
-            span(style = paste0("font-size: 0.72rem; color: ", g_col, ";"),
-                 if (length(genders) > 1) g else "UDISE"),
-            span(style = paste0("font-size: 1.05rem; font-weight: 600; color: ", g_col, ";"),
-                 round(row$value[1], 1)),
-            span(style = "font-size: 0.68rem; color: #A0A8C0;",
-                 paste0(yr, "–", as.integer(yr) + 1))
-        )
-      })
-      rows <- Filter(Negate(is.null), rows)
-      if (length(rows) == 0) return(NULL)
-      div(style = paste0(
-        "background: #3D4268; border-radius: 5px; padding: 8px 10px;",
-        "border-left: 2px solid #c9a0a0; margin-bottom: 4px;"
-      ),
-      div(style = "font-size: 0.65rem; color: #A0A8C0; margin-bottom: 5px; letter-spacing: 0.05em;",
-          "UDISE+"),
+    tagList(
+      div(style = "font-size: 0.65rem; color: #999993; letter-spacing: 0.06em; margin-bottom: 8px; text-transform: uppercase;",
+          "India \u00b7 Latest available"),
       tagList(rows)
-      )
-    }
-
-    # One UDISE callout box per plot
-    make_udise_box <- function(plot_code, udise_level, genders) {
-      if (is.null(udise_level)) return(NULL)
-      rows <- lapply(genders, function(g) {
-        row <- students_udise |>
-          filter(plot == plot_code, udise_level == udise_level, gender == g) |>
-          slice_max(year, n = 1, with_ties = FALSE)
-        if (nrow(row) == 0) return(NULL)
-        g_col <- if (g == "Female") COL_FEMALE else if (g == "Male") COL_MALE else COL_OFFWHITE
-        yr    <- row$year[1]
-        div(style = "display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;",
-            span(style = paste0("font-size: 0.72rem; color: ", g_col, ";"),
-                 if (length(genders) > 1) g else "UDISE"),
-            span(style = paste0("font-size: 1.05rem; font-weight: 600; color: ", g_col, ";"),
-                 round(row$value[1], 1)),
-            span(style = "font-size: 0.68rem; color: #A0A8C0;",
-                 paste0(yr, "–", as.integer(yr) + 1))
-        )
-      })
-      rows <- Filter(Negate(is.null), rows)
-      if (length(rows) == 0) return(NULL)
-      div(style = paste0(
-        "background: #3D4268; border-radius: 5px; padding: 8px 10px;",
-        "border-left: 2px solid #c9a0a0; margin-bottom: 4px;"
-      ),
-      div(style = "font-size: 0.65rem; color: #A0A8C0; margin-bottom: 5px; letter-spacing: 0.05em;",
-          "UDISE+"),
-      tagList(rows)
-      )
-    }
-    
-    sidebar_entry <- function(label, desc, src_url, plot_code, level,
-                              udise_box = NULL) {
-      tagList(
-        div(style = label_style, label),
-        div(style = desc_style, desc),
-        tags$a("Source: WDI", href = src_url, target = "_blank", style = link_style),
-        div(style = "font-size: 0.72rem; color: #A0A8C0; margin-bottom: 5px;",
-            wb_latest(plot_code, level)),
-        udise_box
-      )
-    }
-
-    if (is_enrolment) {
-      tagList(
-        sidebar_entry(
-          "Gross Enrolment Ratio (GER)",
-          "Total enrolment at a given level as % of the official school-age population. May exceed 100% due to over- and under-age students.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.ENRR",
-          "GER", lev1, make_udise_box_t1("4010", udise_lev1, genders)
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Net Enrolment Rate (NER)",
-          "Enrolment of the official school-age group only, as % of that population. More precisely reflects access than GER.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.NENR",
-          "NER", lev2, make_udise_box_t1("4011", udise_lev2, genders)
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Net Intake Rate (NIR), Primary",
-          "New entrants to Grade 1 of official school-entry age, as % of that age population.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.NINT.ZS",
-          "NIR", "Primary"
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Gross Intake Ratio (GIR), Primary",
-          "All new Grade 1 entrants regardless of age, as % of the official school-entry age population. May exceed 100%.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.GINT.ZS",
-          "GIR", "Primary"
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Gender Parity Index (GPI)",
-          "Female-to-male ratio of GER. Values below 1 indicate male-favoured enrolment; above 1 indicate female-favoured.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.ENR.PRIM.FM.ZS",
-          "GPI", input$gpi_level %||% "Primary",
-          make_udise_box_t1("4032", switch(input$gpi_level %||% "Primary",
-            "Primary"="Preparatory", "Secondary"="Secondary", NULL), "Total")
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Out-of-School Rate",
-          "% of children of official school-age who are not enrolled. Lower is better.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.UNER.ZS",
-          "OOS", input$oos_level %||% "Primary"
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Private School Enrolment Share",
-          "% of students enrolled in private institutions. WB source; UDISE 2024-25 point estimate shown.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.PRIV.ZS",
-          "PRIV", input$priv_level %||% "Primary"
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Over-Age Enrolment, Primary",
-          "% of primary pupils who are more than 2 years above the official age for their grade.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.OENR.ZS",
-          "OVERAGE", "Primary"
-        )
-      )
-    } else {
-      tagList(
-        sidebar_entry(
-          "Primary Completion Rate",
-          "% of children who complete primary education. Measures whether children who start primary also finish it.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.CMPT.ZS",
-          "COMPL_PRM", "Primary"
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Lower Secondary Completion Rate",
-          "% of children who complete lower secondary (Grades 6-9). Key milestone for further education.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.SEC.CMPT.LO.ZS",
-          "COMPL_LSEC", "Lower Secondary"
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Persistence to Grade 5",
-          "% of Grade 1 pupils who reach Grade 5. Tracks early-grade retention using the reconstructed cohort method.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.PRS5.ZS",
-          "PRS5", "Primary"
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Persistence to Last Grade of Primary",
-          "% of Grade 1 pupils who reach the final grade of primary. A broader retention measure than Grade 5.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.PRSL.ZS",
-          "PERS", "Primary",
-          make_udise_box("PERS", "Preparatory", genders)
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Progression to Secondary",
-          "% of pupils completing primary who enrol in Grade 6. Captures the transition efficiency between cycles.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.PRSC.ZS",
-          "PROG", "Primary"
-        ),
-        tags$hr(style = "border-color: #3D4268; margin: 12px 0;"),
-        sidebar_entry(
-          "Repetition Rate, Primary",
-          "% of primary pupils who repeat their grade. Lower values indicate better internal efficiency.",
-          "https://databank.worldbank.org/metadataglossary/world-development-indicators/series/SE.PRM.REPT.ZS",
-          "REP", "Primary",
-          make_udise_box("REP", "Preparatory", genders)
-        )
-      )
-    }
+    )
   })
+
   
   # ── Plot layout helpers ───────────────────────────────────────────────────────
   
   # Bar chart layout — title handled separately, not via layout(title=)
-  bar_layout <- function(p, y_label, x_range = NULL) {
+  bar_layout <- function(p, y_label, y_range = NULL) {
     p |>
       layout(
         paper_bgcolor = COL_NEARWHITE,
         plot_bgcolor  = COL_NEARWHITE,
         font          = list(family = "Inter", size = 11, color = COL_INDIGO),
-        margin        = list(l = 10, r = 20, t = 10, b = 50),
+        margin        = list(l = 20, r = 20, t = 10, b = 60),
         xaxis = list(
-          title        = list(text = y_label, font = list(size = 11, color = COL_INDIGO)),
-          range        = x_range,
-          showgrid     = TRUE,
-          gridcolor    = COL_BORDER,
-          zeroline     = TRUE,
-          zerolinecolor = COL_BORDER,
-          tickfont     = list(size = 10),
-          tickformat   = ".1f"
+          showgrid = FALSE, zeroline = FALSE,
+          tickfont = list(size = 9, color = COL_INDIGO),
+          ticks = "", showline = FALSE
         ),
         yaxis = list(
-          showticklabels = FALSE,
-          showgrid       = FALSE,
-          categoryorder  = "trace"
+          title    = list(text = y_label, font = list(size = 11, color = COL_INDIGO)),
+          range    = y_range,
+          showgrid = TRUE,  gridcolor = COL_BORDER,
+          zeroline = TRUE,  zerolinecolor = COL_BORDER,
+          tickfont = list(size = 10), tickformat = ".1f"
         ),
         showlegend = FALSE
       ) |>
@@ -419,60 +175,49 @@ server <- function(input, output, session) {
   
   # ── Single-gender bar chart ───────────────────────────────────────────────────
   make_bar <- function(plot_code, .level, .gender, .year, reverse,
-                       india_col, y_label, x_range = NULL) {
+                       india_col, y_label, y_range = NULL) {
     df <- students_wb |>
       filter(plot == plot_code, level == .level,
              gender == .gender, year == .year, !is.na(value))
-    
+
     if (nrow(df) == 0) {
       return(
         plotly_empty() |>
-          layout(
-            paper_bgcolor = COL_NEARWHITE,
-            plot_bgcolor  = COL_NEARWHITE,
-            annotations   = list(list(
-              text = "Data not available for this year",
-              x = 0.5, y = 0.5, xref = "paper", yref = "paper",
-              showarrow = FALSE,
-              font = list(size = 13, color = "#A0A8C0", family = "Inter")
-            ))
-          ) |>
+          layout(paper_bgcolor = COL_NEARWHITE, plot_bgcolor = COL_NEARWHITE,
+                 annotations = list(list(text = "Data not available for this year",
+                   x = 0.5, y = 0.5, xref = "paper", yref = "paper",
+                   showarrow = FALSE, font = list(size = 13, color = "#999993", family = "Inter")
+                 ))) |>
           config(displayModeBar = FALSE)
       )
     }
-    
+
     df <- df |>
       group_by(country_iso3) |>
       summarise(value = mean(value, na.rm = TRUE), .groups = "drop") |>
       arrange(if (reverse) desc(value) else value) |>
+      left_join(country_names, by = c("country_iso3" = "iso3c")) |>
       mutate(
         bar_col   = if_else(country_iso3 == "IND", india_col, COL_STEEL),
-        country_f = factor(country_iso3, levels = country_iso3)
+        country_f = factor(country_iso3, levels = country_iso3),
+        label     = coalesce(country_name, country_iso3)
       )
-    
-    n_ctry    <- nrow(df)
-    tick_size <- if (n_ctry > 120) 6 else if (n_ctry > 80) 7 else 8
-    
+
+    n <- nrow(df)
+    labeled <- unique(c(as.character(df$country_f[1]),
+                        if ("IND" %in% df$country_iso3) "IND",
+                        as.character(df$country_f[n])))
+    t_text  <- df$label[match(labeled, df$country_iso3)]
+
     plot_ly(df,
-            x             = ~value,
-            y             = ~country_f,
-            type          = "bar",
-            orientation   = "h",
-            marker        = list(color = ~bar_col),
-            hovertemplate = "<b>%{y}</b>: %{x:.1f}<extra></extra>"
+      x = ~country_f, y = ~value, type = "bar",
+      marker        = list(color = ~bar_col),
+      text          = ~label,
+      hovertemplate = "<b>%{text}</b>: %{y:.1f}<extra></extra>"
     ) |>
-      bar_layout(y_label, x_range = x_range) |>
-      layout(
-        margin = list(l = 42, r = 20, t = 10, b = 50),
-        yaxis  = list(
-          title          = "",
-          showticklabels = TRUE,
-          tickfont       = list(size = tick_size, color = COL_INDIGO),
-          showgrid       = FALSE,
-          categoryorder  = "trace",
-          automargin     = TRUE
-        )
-      )
+      bar_layout(y_label, y_range = y_range) |>
+      layout(xaxis = list(tickmode = "array", tickvals = labeled,
+                          ticktext = t_text, tickangle = 0))
   }
   
   # ── Single-gender line chart ──────────────────────────────────────────────────
@@ -531,37 +276,20 @@ server <- function(input, output, session) {
     req(year)
     meta <- PLOT_META[[plot_code]]
     mode <- gender_mode()
-    
+
     if (mode == "total") {
       make_bar(plot_code, level, "Total", year, reverse, COL_ROSE, meta$y_label)
     } else {
-      .l <- level; .y <- year
-      df_f <- students_wb |>
-        filter(plot == plot_code, level == .l, gender == "Female", year == .y, !is.na(value))
-      df_m <- students_wb |>
-        filter(plot == plot_code, level == .l, gender == "Male",   year == .y, !is.na(value))
-      
-      all_vals <- c(df_f$value, df_m$value)
-      if (length(all_vals) == 0 || all(is.na(all_vals))) {
-        x_range <- NULL
-      } else {
-        rng     <- range(all_vals, na.rm = TRUE)
-        pad     <- diff(rng) * 0.08
-        x_range <- c(rng[1] - pad, rng[2] + pad)
-      }
-      
-      pf <- make_bar(plot_code, .l, "Female", .y, reverse, COL_FEMALE, meta$y_label, x_range)
-      pm <- make_bar(plot_code, .l, "Male",   .y, reverse, COL_MALE,   meta$y_label, x_range)
-      
+      pf <- make_bar(plot_code, level, "Female", year, reverse, COL_FEMALE, meta$y_label)
+      pm <- make_bar(plot_code, level, "Male",   year, reverse, COL_MALE,   meta$y_label)
+
       subplot(pf, pm, nrows = 1, shareY = TRUE, titleX = TRUE) |>
-        layout(
-          annotations = list(
-            list(text = "Female", x = 0.22, y = 1.04, xref = "paper", yref = "paper",
-                 showarrow = FALSE, font = list(size = 12, color = COL_FEMALE)),
-            list(text = "Male",   x = 0.78, y = 1.04, xref = "paper", yref = "paper",
-                 showarrow = FALSE, font = list(size = 12, color = COL_MALE))
-          )
-        ) |>
+        layout(annotations = list(
+          list(text = "Female", x = 0.22, y = 1.04, xref = "paper", yref = "paper",
+               showarrow = FALSE, font = list(size = 12, color = COL_FEMALE)),
+          list(text = "Male",   x = 0.78, y = 1.04, xref = "paper", yref = "paper",
+               showarrow = FALSE, font = list(size = 12, color = COL_MALE))
+        )) |>
         config(displayModeBar = FALSE)
     }
   }
@@ -1025,19 +753,20 @@ server <- function(input, output, session) {
     df <- df |>
       group_by(country_iso3) |> summarise(value = mean(value, na.rm=TRUE), .groups="drop") |>
       arrange(value) |>
-      mutate(country_f = factor(country_iso3, levels = country_iso3))
-    tick_size <- if (nrow(df) > 60) 7 else 8
-    plot_ly(df, x = ~value, y = ~country_f, type = "bar", orientation = "h",
+      left_join(country_names, by = c("country_iso3" = "iso3c")) |>
+      mutate(country_f = factor(country_iso3, levels = country_iso3),
+             label = coalesce(country_name, country_iso3))
+    n <- nrow(df)
+    labeled <- unique(c(as.character(df$country_f[1]), as.character(df$country_f[n])))
+    t_text  <- df$label[match(labeled, df$country_iso3)]
+    plot_ly(df, x = ~country_f, y = ~value, type = "bar",
             marker = list(color = COL_STEEL),
-            hovertemplate = "<b>%{y}</b>: %{x:.0f}<extra></extra>") |>
+            text = ~label,
+            hovertemplate = "<b>%{text}</b>: %{y:.0f}<extra></extra>") |>
       bar_layout(y_label) |>
-      layout(
-        margin = list(l = 42, r = 20, t = 10, b = 50),
-        xaxis  = list(tickformat = ".0f"),
-        yaxis  = list(title = "", showticklabels = TRUE,
-                      tickfont = list(size = tick_size, color = COL_INDIGO),
-                      showgrid = FALSE, categoryorder = "trace", automargin = TRUE)
-      )
+      layout(yaxis = list(tickformat = ".0f"),
+             xaxis = list(tickmode = "array", tickvals = labeled,
+                          ticktext = t_text, tickangle = 0))
   }
 
   make_pisa_line <- function(plot_code, y_label) {

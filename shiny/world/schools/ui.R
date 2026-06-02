@@ -6,67 +6,70 @@ inter_font <- tags$link(rel = "stylesheet", href = "https://rsms.me/inter/inter.
 
 custom_css <- tags$style(HTML("
   * { font-family: 'Inter', sans-serif; }
-  body, .bslib-page-sidebar { background-color: #fafaf8; }
-  .bslib-sidebar-layout > .sidebar { background-color: #2e3250; color: #f0eeea; }
+  body, .bslib-page-sidebar { background-color: #fdfaf6; }
+  .bslib-sidebar-layout > .sidebar { background-color: #1a1a1a; color: #fdfaf6; }
   .bslib-sidebar-layout > .sidebar label,
-  .bslib-sidebar-layout > .sidebar .control-label { color: #f0eeea; }
+  .bslib-sidebar-layout > .sidebar .control-label { color: #fdfaf6; }
   .bslib-sidebar-layout > .sidebar select,
   .bslib-sidebar-layout > .sidebar .form-control {
-    background-color: #3d4268; color: #f0eeea; border-color: #c9a0a0;
+    background-color: #2a2a2a; color: #fdfaf6; border-color: #e8ad4a;
   }
   .irs--shiny .irs-bar, .irs--shiny .irs-handle {
-    background-color: #c9a0a0 !important; border-color: #c9a0a0 !important;
+    background-color: #e8ad4a !important; border-color: #e8ad4a !important;
   }
   .irs--shiny .irs-from, .irs--shiny .irs-to, .irs--shiny .irs-single {
-    background-color: #c9a0a0 !important;
+    background-color: #e8ad4a !important;
   }
   .india-callout {
-    background-color: #3d4268; border-left: 3px solid #c9a0a0;
+    background-color: #2a2a2a; border-left: 3px solid #e8ad4a;
     border-radius: 4px; padding: 10px 12px; margin-top: 8px;
-    color: #f0eeea; font-size: 0.85rem;
+    color: #fdfaf6; font-size: 0.85rem;
   }
-  .card { background-color: #fafaf8; border: 1px solid #e8e6e2; }
-  .bslib-sidebar-layout > .sidebar hr { border-color: #4a5080; }
+  .card { background-color: #fdfaf6; border: 1px solid #e8e4dc; }
+  .bslib-sidebar-layout > .sidebar hr { border-color: #333333; }
   .gender-btn {
-    background-color: #3d4268; color: #f0eeea;
-    border: 1px solid #4a5080; border-radius: 4px;
+    background-color: #2a2a2a; color: #fdfaf6;
+    border: 1px solid #333333; border-radius: 4px;
     padding: 4px 10px; font-size: 0.8rem; cursor: pointer;
     transition: background-color 0.15s;
   }
   .gender-btn.active, .gender-btn:hover {
-    background-color: #c9a0a0; border-color: #c9a0a0; color: white;
+    background-color: #e8ad4a; border-color: #e8ad4a; color: #1a1a1a;
   }
   .view-toggle-sidebar { display: flex; gap: 6px; margin-bottom: 12px; }
   .view-btn {
-    background-color: #3d4268; color: #f0eeea;
-    border: 1px solid #4a5080; border-radius: 4px;
+    background-color: #2a2a2a; color: #fdfaf6;
+    border: 1px solid #333333; border-radius: 4px;
     padding: 4px 10px; font-size: 0.8rem; cursor: pointer;
     flex: 1; text-align: center; transition: background-color 0.15s;
   }
-  .view-btn.active { background-color: #c9a0a0; border-color: #c9a0a0; color: white; }
+  .view-btn.active { background-color: #e8ad4a; border-color: #e8ad4a; color: #1a1a1a; }
   .sources-footer {
     margin-top: 16px; padding: 10px 14px;
-    border-top: 1px solid #e8e6e2;
-    font-size: 0.72rem; color: #A0A8C0; line-height: 1.7;
+    border-top: 1px solid #e8e4dc;
+    font-size: 0.72rem; color: #999993; line-height: 1.7;
   }
-  .sources-footer a { color: #A0A8C0; text-decoration: underline; }
+  .sources-footer a { color: #999993; text-decoration: underline; }
   .card > .card-header {
-    background-color: #fafaf8; border-bottom: 1px solid #e8e6e2;
-    font-size: 13px; font-weight: 500; color: #2e3250; padding: 8px 12px;
+    background-color: #fdfaf6; border-bottom: 1px solid #e8e4dc;
+    font-size: 13px; font-weight: 500; color: #1a1a1a; padding: 8px 12px;
   }
-  .nav-pills .nav-link { font-size: 0.82rem; color: #2e3250; }
+  .nav-pills .nav-link { font-size: 0.82rem; color: #1a1a1a; }
   .nav-pills .nav-link.active {
-    background-color: #2e3250 !important; color: #f0eeea !important;
+    background-color: #1a1a1a !important; color: #fdfaf6 !important;
   }
   .pisa-note {
-    font-size: 0.72rem; color: #A0A8C0; margin-top: 6px; padding-left: 4px;
+    font-size: 0.72rem; color: #999993; margin-top: 6px; padding-left: 4px;
+  }
+  .plot-desc {
+    font-size: 0.70rem; color: #888880; padding: 2px 12px 8px; line-height: 1.4;
   }
 "))
 
 ui <- page_sidebar(
   title = NULL,
-  theme = bs_theme(bootswatch = "flatly", bg = "#fafaf8",
-                   fg = "#2e3250", primary = "#c9a0a0"),
+  theme = bs_theme(bootswatch = "flatly", bg = "#fdfaf6",
+                   fg = "#1a1a1a", primary = "#e8ad4a"),
   tags$head(inter_font, custom_css),
   useShinyjs(),
 
@@ -74,10 +77,10 @@ ui <- page_sidebar(
     width = 260,
 
     # View toggle (no gender toggle — no gender breakdown in this data)
-    tags$label("View", style = "color: #f0eeea; font-size: 0.85rem;"),
+    tags$label("View", style = "color: #fdfaf6; font-size: 0.85rem;"),
     div(class = "view-toggle-sidebar",
-        actionButton("view_bar",  "Country ranking", class = "view-btn active"),
-        actionButton("view_time", "Over time",        class = "view-btn")
+        actionButton("view_bar",  "Country ranking", class = "view-btn"),
+        actionButton("view_time", "Over time",        class = "view-btn active")
     ),
 
     uiOutput("year_slider_ui"),
@@ -100,7 +103,8 @@ ui <- page_sidebar(
                         choices  = c("Pre-primary", "Primary", "Secondary", "Compulsory"),
                         selected = "Primary", width = "130px")
           )),
-          plotlyOutput("plot_dur", height = "420px")
+          plotlyOutput("plot_dur", height = "420px"),
+          div(class = "plot-desc", PLOT_META[["SCHED_DUR"]]$description)
         ),
 
         card(
@@ -111,7 +115,8 @@ ui <- page_sidebar(
                         choices  = c("Primary", "Secondary"),
                         selected = "Primary", width = "110px")
           )),
-          plotlyOutput("plot_priv", height = "420px")
+          plotlyOutput("plot_priv", height = "420px"),
+          div(class = "plot-desc", PLOT_META[["PRIV"]]$description)
         )
       ),
       div(class = "sources-footer",
