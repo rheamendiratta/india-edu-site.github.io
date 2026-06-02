@@ -6,3 +6,5 @@ vendor
 .Rproj.user
 data/raw/
 data/clean/*.csv
+data/UDISE_Project_database_updated.csv
+data/World_Dashboard_Plan_FILLED.md

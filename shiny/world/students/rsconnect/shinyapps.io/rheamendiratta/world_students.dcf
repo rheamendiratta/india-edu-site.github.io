@@ -5,8 +5,6 @@ account: rheamendiratta
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 16878457
-bundleId: 11696627
+bundleId: 12072206
 url: https://rheamendiratta.shinyapps.io/world_students/
 version: 1
-asMultiple: FALSE
-asStatic: FALSE

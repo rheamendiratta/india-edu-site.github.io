@@ -132,7 +132,7 @@ ui <- page_sidebar(
     div(
       class = "view-toggle-sidebar",
       actionButton("view_bar",  "Country ranking", class = "view-btn active"),
-      actionButton("view_time", "Over time",       class = "view-btn")
+      actionButton("view_time", "Over time", class = "view-btn")
     ),
     
     # Year slider — only shown in ranking view
@@ -181,6 +181,94 @@ ui <- page_sidebar(
                     )
                   ),
                   plotlyOutput("plot_ner", height = "420px")
+                ),
+
+                card(
+                  card_header("Net Intake Rate (NIR), Primary"),
+                  plotlyOutput("plot_nir", height = "420px")
+                ),
+
+                card(
+                  card_header("Gross Intake Ratio (GIR), Primary"),
+                  plotlyOutput("plot_gir", height = "420px")
+                ),
+
+                card(
+                  card_header(
+                    div(
+                      style = "display: flex; justify-content: space-between; align-items: center;",
+                      span("Gender Parity Index (GPI of GER)"),
+                      selectInput("gpi_level", label = NULL,
+                                  choices  = c("Primary", "Secondary", "Tertiary"),
+                                  selected = "Primary",
+                                  width    = "110px"
+                      )
+                    )
+                  ),
+                  plotlyOutput("plot_gpi", height = "420px")
+                ),
+
+                card(
+                  card_header(
+                    div(
+                      style = "display: flex; justify-content: space-between; align-items: center;",
+                      span("Out-of-School Rate"),
+                      selectInput("oos_level", label = NULL,
+                                  choices  = c("Primary", "Lower Secondary"),
+                                  selected = "Primary",
+                                  width    = "150px"
+                      )
+                    )
+                  ),
+                  plotlyOutput("plot_oos", height = "420px")
+                ),
+
+                card(
+                  card_header(
+                    div(
+                      style = "display: flex; justify-content: space-between; align-items: center;",
+                      span("Private School Enrolment Share"),
+                      selectInput("priv_level", label = NULL,
+                                  choices  = c("Primary", "Secondary"),
+                                  selected = "Primary",
+                                  width    = "110px"
+                      )
+                    )
+                  ),
+                  plotlyOutput("plot_priv", height = "420px")
+                ),
+
+                card(
+                  card_header("Over-Age Enrolment, Primary"),
+                  plotlyOutput("plot_overage", height = "420px")
+                ),
+
+                card(
+                  card_header(
+                    div(
+                      style = "display: flex; justify-content: space-between; align-items: center;",
+                      span("Enrolment (Number of Students)"),
+                      selectInput("enrl_num_level", label = NULL,
+                                  choices  = c("Primary", "Secondary", "Secondary General"),
+                                  selected = "Primary",
+                                  width    = "170px")
+                    )
+                  ),
+                  plotlyOutput("plot_enrl_num", height = "420px")
+                ),
+
+                card(
+                  card_header(
+                    div(
+                      style = "display: flex; justify-content: space-between; align-items: center;",
+                      span("Enrolment, % Female"),
+                      selectInput("enrl_pctf_level", label = NULL,
+                                  choices  = c("Primary", "Secondary"),
+                                  selected = "Primary",
+                                  width    = "110px")
+                    )
+                  ),
+                  plotlyOutput("plot_enrl_pctf", height = "420px")
                 )
               ), # end layout_column_wrap
               
@@ -197,19 +285,182 @@ ui <- page_sidebar(
               )
     ),
     
+    # ── Tab 3: Learning Outcomes ──────────────────────────────────────────────
+    nav_panel("Learning Outcomes",
+              layout_column_wrap(
+                width = 1/2, gap = "12px",
+
+                card(
+                  card_header("Harmonized Test Scores"),
+                  plotlyOutput("plot_hts", height = "420px")
+                ),
+
+                card(
+                  card_header("Learning-Adjusted Years of Schooling (LAYS)"),
+                  plotlyOutput("plot_lays", height = "420px")
+                ),
+
+                card(
+                  card_header("Expected Years of Schooling"),
+                  plotlyOutput("plot_eys", height = "420px")
+                ),
+
+                card(
+                  card_header("Learning Poverty, Primary"),
+                  plotlyOutput("plot_lp", height = "420px")
+                ),
+
+                card(
+                  card_header("Learning Deprivation, Primary"),
+                  plotlyOutput("plot_ld", height = "420px")
+                ),
+
+                card(
+                  card_header("School Deprivation, Primary"),
+                  plotlyOutput("plot_sd", height = "420px")
+                ),
+
+                card(
+                  card_header("PISA: Mean Mathematics Score"),
+                  plotlyOutput("plot_pisa_math", height = "420px"),
+                  div(style = "font-size:0.72rem;color:#A0A8C0;padding:4px 12px 8px;",
+                      "India is not in PISA; no India line shown.")
+                ),
+
+                card(
+                  card_header("PISA: Mean Reading Score"),
+                  plotlyOutput("plot_pisa_read", height = "420px"),
+                  div(style = "font-size:0.72rem;color:#A0A8C0;padding:4px 12px 8px;",
+                      "India is not in PISA; no India line shown.")
+                ),
+
+                card(
+                  card_header("PISA: Mean Science Score"),
+                  plotlyOutput("plot_pisa_sci", height = "420px"),
+                  div(style = "font-size:0.72rem;color:#A0A8C0;padding:4px 12px 8px;",
+                      "India is not in PISA; no India line shown.")
+                )
+              ),
+              div(class = "sources-footer",
+                  tags$b("Sources: "),
+                  tags$span("World Bank Human Capital Index (HCI); "),
+                  tags$a("worldbank.org/hci", href = "https://www.worldbank.org/en/publication/human-capital",
+                         target = "_blank"), tags$span(". "),
+                  tags$span("World Bank World Development Indicators (WDI), Learning Poverty; "),
+                  tags$a("data.worldbank.org", href = "https://data.worldbank.org",
+                         target = "_blank"), tags$span(".")
+              )
+    ),
+
+    # ── Tab 5: Literacy ───────────────────────────────────────────────────────
+    nav_panel("Literacy",
+              layout_column_wrap(
+                width = 1/2, gap = "12px",
+
+                card(
+                  card_header("Adult Literacy Rate (15+)"),
+                  plotlyOutput("plot_lit_adt", height = "420px")
+                ),
+
+                card(
+                  card_header("Youth Literacy Rate (15–24)"),
+                  plotlyOutput("plot_lit_yth", height = "420px")
+                ),
+
+                card(
+                  card_header("Youth Literacy Gender Parity Index"),
+                  plotlyOutput("plot_lit_yth_gpi", height = "420px")
+                )
+              ),
+              div(class = "sources-footer",
+                  tags$b("Sources: "),
+                  tags$span("World Bank World Development Indicators (WDI); "),
+                  tags$a("data.worldbank.org", href = "https://data.worldbank.org", target = "_blank"),
+                  tags$span(". Based on UNESCO Institute for Statistics (UIS) data.")
+              )
+    ),
+
+    # ── Tab 4: Educational Attainment ─────────────────────────────────────────
+    nav_panel("Educational Attainment",
+              layout_column_wrap(
+                width = 1/2, gap = "12px",
+
+                card(
+                  card_header("Primary Attainment, Adults 25+"),
+                  plotlyOutput("plot_attain_prm", height = "420px")
+                ),
+
+                card(
+                  card_header("Lower Secondary Attainment, Adults 25+"),
+                  plotlyOutput("plot_attain_lsec", height = "420px")
+                ),
+
+                card(
+                  card_header("Upper Secondary Attainment, Adults 25+"),
+                  plotlyOutput("plot_attain_usec", height = "420px")
+                ),
+
+                card(
+                  card_header("Tertiary Attainment (Bachelor's+), Adults 25+"),
+                  plotlyOutput("plot_attain_ter", height = "420px")
+                ),
+
+                card(
+                  card_header("Short-Cycle Tertiary Attainment, Adults 25+"),
+                  plotlyOutput("plot_attain_st", height = "420px")
+                ),
+
+                card(
+                  card_header("Master's Attainment, Adults 25+"),
+                  plotlyOutput("plot_attain_ms", height = "420px")
+                ),
+
+                card(
+                  card_header("Doctoral Attainment, Adults 25+"),
+                  plotlyOutput("plot_attain_do", height = "420px")
+                )
+              ),
+              div(class = "sources-footer",
+                  tags$b("Sources: "),
+                  tags$span("World Bank World Development Indicators (WDI), Educational Attainment; "),
+                  tags$a("data.worldbank.org", href = "https://data.worldbank.org", target = "_blank"),
+                  tags$span(". Based on UNESCO Institute for Statistics (UIS) data.")
+              )
+    ),
+
     # ── Tab 2: Completion, Persistence & Flow ─────────────────────────────────
     nav_panel("Completion, Persistence & Flow",
               layout_column_wrap(
                 width = 1/2, gap = "12px",
-                
+
                 card(
-                  card_header("Repetition Rate, Primary"),
-                  plotlyOutput("plot_rep", height = "420px")
+                  card_header("Primary Completion Rate"),
+                  plotlyOutput("plot_compl_prm", height = "420px")
                 ),
-                
+
+                card(
+                  card_header("Lower Secondary Completion Rate"),
+                  plotlyOutput("plot_compl_lsec", height = "420px")
+                ),
+
+                card(
+                  card_header("Persistence to Grade 5"),
+                  plotlyOutput("plot_prs5", height = "420px")
+                ),
+
                 card(
                   card_header("Persistence to Last Grade of Primary"),
                   plotlyOutput("plot_pers", height = "420px")
+                ),
+
+                card(
+                  card_header("Progression to Secondary"),
+                  plotlyOutput("plot_prog", height = "420px")
+                ),
+
+                card(
+                  card_header("Repetition Rate, Primary"),
+                  plotlyOutput("plot_rep", height = "420px")
                 )
               ), # end layout_column_wrap
               

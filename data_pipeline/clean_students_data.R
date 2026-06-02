@@ -54,7 +54,97 @@ indicator_meta <- tribble(
   # Persistence
   "WB_WDI_SE_PRM_PRSL_ZS",       "PERS",  "Primary",        "Total",
   "WB_WDI_SE_PRM_PRSL_FE_ZS",    "PERS",  "Primary",        "Female",
-  "WB_WDI_SE_PRM_PRSL_MA_ZS",    "PERS",  "Primary",        "Male"
+  "WB_WDI_SE_PRM_PRSL_MA_ZS",    "PERS",  "Primary",        "Male",
+  # Net Intake Rate
+  "WB_WDI_SE_PRM_NINT_ZS",       "NIR",     "Primary",           "Total",
+  "WB_WDI_SE_PRM_NINT_FE_ZS",    "NIR",     "Primary",           "Female",
+  "WB_WDI_SE_PRM_NINT_MA_ZS",    "NIR",     "Primary",           "Male",
+  # Gross Intake Ratio
+  "WB_WDI_SE_PRM_GINT_ZS",       "GIR",     "Primary",           "Total",
+  "WB_WDI_SE_PRM_GINT_FE_ZS",    "GIR",     "Primary",           "Female",
+  "WB_WDI_SE_PRM_GINT_MA_ZS",    "GIR",     "Primary",           "Male",
+  # GPI (Gender Parity Index of GER)
+  "WB_WDI_SE_ENR_PRIM_FM_ZS",    "GPI",     "Primary",           "Total",
+  "WB_WDI_SE_ENR_SECO_FM_ZS",    "GPI",     "Secondary",         "Total",
+  "WB_WDI_SE_ENR_TERT_FM_ZS",    "GPI",     "Tertiary",          "Total",
+  # Out-of-School Rate
+  "WB_WDI_SE_PRM_UNER_ZS",       "OOS",     "Primary",           "Total",
+  "WB_WDI_SE_PRM_UNER_FE_ZS",    "OOS",     "Primary",           "Female",
+  "WB_WDI_SE_PRM_UNER_MA_ZS",    "OOS",     "Primary",           "Male",
+  "WB_WDI_SE_SEC_UNER_LO_ZS",    "OOS",     "Lower Secondary",   "Total",
+  "WB_WDI_SE_SEC_UNER_LO_FE_ZS", "OOS",     "Lower Secondary",   "Female",
+  "WB_WDI_SE_SEC_UNER_LO_MA_ZS", "OOS",     "Lower Secondary",   "Male",
+  # Private Share (no gender breakdown from WB)
+  "WB_WDI_SE_PRM_PRIV_ZS",       "PRIV",    "Primary",           "Total",
+  "WB_WDI_SE_SEC_PRIV_ZS",       "PRIV",    "Secondary",         "Total",
+  # Over-Age Enrolment
+  "WB_WDI_SE_PRM_OENR_ZS",        "OVERAGE",    "Primary",           "Total",
+  "WB_WDI_SE_PRM_OENR_FE_ZS",     "OVERAGE",    "Primary",           "Female",
+  "WB_WDI_SE_PRM_OENR_MA_ZS",     "OVERAGE",    "Primary",           "Male",
+  # Completion Rates (Tab 2)
+  "WB_WDI_SE_PRM_CMPT_ZS",        "COMPL_PRM",  "Primary",           "Total",
+  "WB_WDI_SE_PRM_CMPT_FE_ZS",     "COMPL_PRM",  "Primary",           "Female",
+  "WB_WDI_SE_PRM_CMPT_MA_ZS",     "COMPL_PRM",  "Primary",           "Male",
+  "WB_WDI_SE_SEC_CMPT_LO_ZS",     "COMPL_LSEC", "Lower Secondary",   "Total",
+  "WB_WDI_SE_SEC_CMPT_LO_FE_ZS",  "COMPL_LSEC", "Lower Secondary",   "Female",
+  "WB_WDI_SE_SEC_CMPT_LO_MA_ZS",  "COMPL_LSEC", "Lower Secondary",   "Male",
+  # Persistence to Grade 5 (Tab 2)
+  "WB_WDI_SE_PRM_PRS5_ZS",        "PRS5",       "Primary",           "Total",
+  "WB_WDI_SE_PRM_PRS5_FE_ZS",     "PRS5",       "Primary",           "Female",
+  "WB_WDI_SE_PRM_PRS5_MA_ZS",     "PRS5",       "Primary",           "Male",
+  # Progression to Secondary (Tab 2)
+  "WB_WDI_SE_PRM_PRSC_ZS",        "PROG",  "Primary",  "Total",
+  "WB_WDI_SE_PRM_PRSC_FE_ZS",     "PROG",  "Primary",  "Female",
+  "WB_WDI_SE_PRM_PRSC_MA_ZS",     "PROG",  "Primary",  "Male",
+  # Harmonized quality scores (Tab 3) — HCI database; total only
+  "WB_HCI_TEST",                   "HTS",   "Primary",  "Total",
+  "WB_HCI_LAYS",                   "LAYS",  "Primary",  "Total",
+  "WB_HCI_EYRS",                   "EYS",   "Primary",  "Total",
+  # Learning Poverty Framework (Tab 3) — WDI; lower = better
+  "WB_WDI_SE_LPV_PRIM",           "LP",    "Primary",  "Total",
+  "WB_WDI_SE_LPV_PRIM_FE",        "LP",    "Primary",  "Female",
+  "WB_WDI_SE_LPV_PRIM_MA",        "LP",    "Primary",  "Male",
+  "WB_WDI_SE_LPV_PRIM_LD",        "LD",    "Primary",  "Total",
+  "WB_WDI_SE_LPV_PRIM_LD_FE",     "LD",    "Primary",  "Female",
+  "WB_WDI_SE_LPV_PRIM_LD_MA",     "LD",    "Primary",  "Male",
+  "WB_WDI_SE_LPV_PRIM_SD",        "SD",    "Primary",  "Total",
+  "WB_WDI_SE_LPV_PRIM_SD_FE",     "SD",    "Primary",  "Female",
+  "WB_WDI_SE_LPV_PRIM_SD_MA",      "SD",           "Primary",  "Male",
+  # Educational Attainment (Tab 4)
+  "WB_WDI_SE_PRM_CUAT_ZS",         "ATTAIN_PRM",  "Primary",  "Total",
+  "WB_WDI_SE_PRM_CUAT_FE_ZS",      "ATTAIN_PRM",  "Primary",  "Female",
+  "WB_WDI_SE_PRM_CUAT_MA_ZS",      "ATTAIN_PRM",  "Primary",  "Male",
+  "WB_WDI_SE_SEC_CUAT_LO_ZS",      "ATTAIN_LSEC", "Primary",  "Total",
+  "WB_WDI_SE_SEC_CUAT_LO_FE_ZS",   "ATTAIN_LSEC", "Primary",  "Female",
+  "WB_WDI_SE_SEC_CUAT_LO_MA_ZS",   "ATTAIN_LSEC", "Primary",  "Male",
+  "WB_WDI_SE_SEC_CUAT_UP_ZS",      "ATTAIN_USEC", "Primary",  "Total",
+  "WB_WDI_SE_SEC_CUAT_UP_FE_ZS",   "ATTAIN_USEC", "Primary",  "Female",
+  "WB_WDI_SE_SEC_CUAT_UP_MA_ZS",   "ATTAIN_USEC", "Primary",  "Male",
+  "WB_WDI_SE_TER_CUAT_BA_ZS",      "ATTAIN_TER",  "Primary",  "Total",
+  "WB_WDI_SE_TER_CUAT_BA_FE_ZS",   "ATTAIN_TER",  "Primary",  "Female",
+  "WB_WDI_SE_TER_CUAT_BA_MA_ZS",   "ATTAIN_TER",   "Primary",  "Male",
+  # Literacy (Tab 5)
+  "WB_WDI_SE_ADT_LITR_ZS",         "LIT_ADT",     "Primary",  "Total",
+  "WB_WDI_SE_ADT_LITR_FE_ZS",      "LIT_ADT",     "Primary",  "Female",
+  "WB_WDI_SE_ADT_LITR_MA_ZS",      "LIT_ADT",     "Primary",  "Male",
+  "WB_WDI_SE_ADT_1524_LT_ZS",      "LIT_YTH",     "Primary",  "Total",
+  "WB_WDI_SE_ADT_1524_LT_FE_ZS",   "LIT_YTH",     "Primary",  "Female",
+  "WB_WDI_SE_ADT_1524_LT_MA_ZS",   "LIT_YTH",     "Primary",  "Male",
+  "WB_WDI_SE_ADT_1524_LT_FM_ZS",   "LIT_YTH_GPI", "Primary",  "Total",
+  # Enrolment numbers (Tab 1 extra)
+  "WB_WDI_SE_PRM_ENRL",            "ENRL_NUM",    "Primary",           "Total",
+  "WB_WDI_SE_PRM_ENRL_FE_ZS",      "ENRL_PCT_F",  "Primary",           "Total",
+  "WB_WDI_SE_SEC_ENRL",            "ENRL_NUM",    "Secondary",         "Total",
+  "WB_WDI_SE_SEC_ENRL_FE_ZS",      "ENRL_PCT_F",  "Secondary",         "Total",
+  "WB_WDI_SE_SEC_ENRL_GC",         "ENRL_NUM",    "Secondary General", "Total",
+  # Extended tertiary attainment (Tab 4 extra)
+  "WB_WDI_SE_TER_CUAT_ST_ZS",      "ATTAIN_ST",   "Primary",  "Total",
+  "WB_WDI_SE_TER_CUAT_MS_ZS",      "ATTAIN_MS",   "Primary",  "Total",
+  "WB_WDI_SE_TER_CUAT_MS_FE_ZS",   "ATTAIN_MS",   "Primary",  "Female",
+  "WB_WDI_SE_TER_CUAT_MS_MA_ZS",   "ATTAIN_MS",   "Primary",  "Male",
+  "WB_WDI_SE_TER_CUAT_DO_ZS",      "ATTAIN_DO",   "Primary",  "Total",
+  "WB_WDI_SE_TER_CUAT_DO_FE_ZS",   "ATTAIN_DO",   "Primary",  "Female",
+  "WB_WDI_SE_TER_CUAT_DO_MA_ZS",   "ATTAIN_DO",   "Primary",  "Male"
 )
 
 # ── UDISE level -> WB level mapping ───────────────────────────────────────────
@@ -72,18 +162,29 @@ udise_to_wb_level <- c(
 message("Loading WB data...")
 wb_raw <- read_csv("data/raw/wb/students_raw.csv", show_col_types = FALSE)
 
+# Append extras (enrolment numbers, extended attainment, HCI components)
+extras_path <- "data/raw/wb/extras_raw.csv"
+if (file.exists(extras_path)) {
+  extras_raw <- read_csv(extras_path, show_col_types = FALSE)
+  wb_raw <- bind_rows(wb_raw, extras_raw)
+  message("  Appended ", nrow(extras_raw), " rows from extras_raw.csv")
+}
+
+# Deduplicate on natural key before any processing.
+# Guards against students_raw.csv being appended to multiple times.
+n_raw <- nrow(wb_raw)
+wb_raw <- wb_raw |> distinct(source_code, country_iso3, year, .keep_all = TRUE)
+if (nrow(wb_raw) < n_raw)
+  message("  Removed ", n_raw - nrow(wb_raw), " duplicate rows from students_raw.csv")
+
 students_wb <- wb_raw |>
   filter(!country_iso3 %in% WB_AGGREGATES) |>
   filter(!is.na(value), !is.na(year), !is.na(country_iso3)) |>
+  select(source_code, country_iso3, year, value) |>   # drop pre-existing plot/level/gender
   inner_join(indicator_meta, by = "source_code") |>
   select(
-    source_code,
-    plot = plot.y,        # use the one from indicator_meta
-    level,
-    gender,
-    country_iso3,
-    year,
-    value
+    source_code, plot, level, gender,
+    country_iso3, year, value
   ) |>
   arrange(plot, level, gender, country_iso3, year)
 
