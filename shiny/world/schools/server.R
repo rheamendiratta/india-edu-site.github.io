@@ -193,7 +193,7 @@ server <- function(input, output, session) {
   # india_df: rows where country_iso3 == "IND" (can be 0-row if India absent)
   # udise_df: optional overlay data frame with columns year, value
   make_line <- function(data_df, y_label,
-                        udise_df = NULL, udise_label = "UDISE 2024-25",
+                        udise_df = NULL, udise_label = "India · UDISE+",
                         india_col = COL_ROSE) {
     world_df <- data_df |> filter(country_iso3 != "IND", !is.na(value))
     india_df <- data_df |> filter(country_iso3 == "IND", !is.na(value))
@@ -210,10 +210,10 @@ server <- function(input, output, session) {
     if (nrow(india_df) > 0) {
       p <- add_trace(p, data = india_df,
                      x = ~year, y = ~value,
-                     type = "scatter", mode = "lines+markers", name = "India (WB)",
+                     type = "scatter", mode = "lines+markers", name = "India · World Bank",
                      line   = list(color = india_col, width = 2.5),
                      marker = list(color = india_col, size = 5),
-                     hovertemplate = "India (WB): %{y:.1f}<extra></extra>")
+                     hovertemplate = "India · World Bank: %{y:.1f}<extra></extra>")
     }
 
     if (!is.null(udise_df) && nrow(udise_df) > 0) {
@@ -278,7 +278,7 @@ server <- function(input, output, session) {
     } else {
       make_line(df, meta$y_label,
                 udise_df    = udise_pt,
-                udise_label = "UDISE 2024-25")
+                udise_label = "India · UDISE+")
     }
   })
 

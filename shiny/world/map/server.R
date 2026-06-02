@@ -32,20 +32,29 @@ server <- function(input, output, session) {
   # India callout
   
   output$india_callout <- renderUI({
-    india_val <- map_filtered() |> 
-      filter(country_iso3 == "IND") |> 
-      slice_max(year, n = 1, with_ties = FALSE) |>
-      pull(value)
-    if (length(india_val) == 0 || is.na(india_val)) {
+    india_row <- map_data |>
+      filter(source_code == input$indicator, country_iso3 == "IND", !is.na(value)) |>
+      slice_max(year, n = 1, with_ties = FALSE)
+
+    sc <- input$indicator
+    src_label <- if      (startsWith(sc, "WB_WDI_"))  "World Bank WDI"
+                 else if (startsWith(sc, "WB_HCI_"))  "World Bank HCI"
+                 else if (startsWith(sc, "WB_SSGD_")) "World Bank"
+                 else                                   "World Bank"
+
+    lbl_s <- "font-size: 0.73rem; font-weight: 600; color: #e8ad4a; margin-bottom: 1px;"
+    val_s <- "font-size: 1.3rem; font-weight: 700; color: #fdfaf6; line-height: 1;"
+    sub_s <- "font-size: 0.67rem; color: #999993; margin-top: 3px;"
+
+    if (nrow(india_row) == 0) {
       div(class = "india-callout",
-          div("India", style = "font-weight:600; margin-bottom:4px;"),
-          div(style = "color:#c9a0a0; font-size:0.8rem;", "No data for ", input$year))
+          div(style = lbl_s, "India"),
+          div(style = sub_s, "No data available"))
     } else {
       div(class = "india-callout",
-          div("India", style = "font-weight:600; margin-bottom:4px;"),
-          div(class = "value", round(india_val, 2)),
-          div(style = "color:#a0a8c0; font-size:0.75rem; margin-top:2px;",
-              input$year, " · ", selected_meta()$label))
+          div(style = lbl_s, "India · Latest available"),
+          div(style = val_s, round(india_row$value[1], 2)),
+          div(style = sub_s, paste0(src_label, " · ", india_row$year[1])))
     }
   })
   
@@ -54,7 +63,7 @@ server <- function(input, output, session) {
   output$indicator_description <- renderUI({
     desc <- indicator_descriptions[[input$indicator]]
     if (!is.null(desc)) {
-      div(style = "color:#a0a8c0; font-size:0.78rem; line-height:1.5; margin-top:4px;", desc)
+      div(style = "color:#999993; font-size:0.78rem; line-height:1.5; margin-top:4px;", desc)
     }
   })
   
@@ -68,7 +77,7 @@ server <- function(input, output, session) {
               worldCopyJump  = FALSE
             )
     ) |>
-      setView(lng = 20, lat = 20, zoom = 2) |>
+      fitBounds(-165, -55, 175, 75) |>
       addProviderTiles(providers$CartoDB.PositronNoLabels)
   })
   
@@ -87,13 +96,13 @@ server <- function(input, output, session) {
       left_join(df, by = c("ISO3166.1.Alpha.3" = "country_iso3"))
     
     pal <- colorNumeric(
-      palette  = colorRampPalette(c("#f0eeea", "#c9a0a0", "#2e3250"))(100),
+      palette  = colorRampPalette(c("#fdfaf6", "#e8ad4a", "#1a1a1a"))(100),
       domain   = val_range,
       na.color = "#1a1a1a"
     )
     
     # Highlight India
-    india_color <- "#c9a0a0"
+    india_color <- "#e8ad4a"
     
     labels <- paste0(
       "<b>", geo_data$name, "</b><br>",
@@ -118,7 +127,7 @@ server <- function(input, output, session) {
         ),
         highlight = highlightOptions(
           weight      = 2,
-          color       = "#2e3250",
+          color       = "#1a1a1a",
           fillOpacity = 0.95,
           bringToFront = TRUE
         )
@@ -148,7 +157,7 @@ server <- function(input, output, session) {
     df <- coverage |>
       filter(source_code == input$indicator) |>
       arrange(year) |>
-      mutate(bar_color = ifelse(india_has_data, "#c9a0a0", "#d8d5d0"))
+      mutate(bar_color = ifelse(india_has_data, "#e8ad4a", "#c8c4be"))
     
     plot_ly(df,
             x           = ~n_countries,
@@ -156,25 +165,26 @@ server <- function(input, output, session) {
             type        = "bar",
             orientation = "h",
             marker      = list(color = ~bar_color, line = list(color = "rgba(0,0,0,0)", width = 0)),
-            hoverinfo   = "none"
+            text        = ~if_else(india_has_data, "India included", "No India data"),
+        hovertemplate = "<b>%{y}</b>: %{x} countries · %{text}<extra></extra>"
     ) |>
       layout(
-        xaxis = list(title = "Countries with data", color = "#2e3250",
+        xaxis = list(title = "Countries with data", color = "#1a1a1a",
                      tickfont = list(family = "Inter", size = 10)),
         yaxis = list(title = "", autorange = "reversed",
-                     tickfont = list(family = "Inter", size = 10), color = "#2e3250"),
+                     tickfont = list(family = "Inter", size = 10), color = "#1a1a1a"),
         showlegend    = FALSE,
         margin        = list(l = 10, r = 10, t = 40, b = 40),
-        plot_bgcolor  = "#fafaf8",
-        paper_bgcolor = "#fafaf8",
-        font          = list(family = "Inter", color = "#2e3250"),
+        plot_bgcolor  = "#fdfaf6",
+        paper_bgcolor = "#fdfaf6",
+        font          = list(family = "Inter", color = "#1a1a1a"),
         title = list(
           text = paste0(
             "Data coverage by year",
-            "  <span style='font-size:11px; color:#c9a0a0'>■ India has data</span>",
-            "  <span style='font-size:11px; color:#d8d5d0'>■ No India data</span>"
+            "  <span style='font-size:11px; color:#e8ad4a'>■ India has data</span>",
+            "  <span style='font-size:11px; color:#c8c4be'>■ No India data</span>"
           ),
-          font = list(family = "Inter", size = 12, color = "#2e3250"), x = 0)
+          font = list(family = "Inter", size = 12, color = "#1a1a1a"), x = 0)
       )
   })
 }

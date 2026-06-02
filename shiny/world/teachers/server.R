@@ -210,20 +210,20 @@ server <- function(input, output, session) {
     }
     if (nrow(df_india) > 0)
       p <- add_trace(p, data = df_india, x = ~year, y = ~value,
-                     type = "scatter", mode = "lines+markers", name = "India (WB)",
+                     type = "scatter", mode = "lines+markers", name = "India · World Bank",
                      line = list(color = col, width = 2.5),
                      marker = list(color = col, size = 5),
-                     hovertemplate = "India (WB): %{y:.1f}<extra></extra>")
+                     hovertemplate = "India · World Bank: %{y:.1f}<extra></extra>")
 
     # UDISE overlay for PTR
     if (!is.null(udise_df) && !is.null(udise_wb_level)) {
       ud <- udise_df |> filter(wb_level == udise_wb_level, !is.na(value))
       if (nrow(ud) > 0)
         p <- add_trace(p, data = ud, x = ~year, y = ~value,
-                       type = "scatter", mode = "lines+markers", name = "India (UDISE)",
+                       type = "scatter", mode = "lines+markers", name = "India · UDISE+",
                        line = list(color = COL_UDISE, width = 2, dash = "dash"),
                        marker = list(color = COL_UDISE, size = 5),
-                       hovertemplate = "India (UDISE): %{y:.1f}<extra></extra>")
+                       hovertemplate = "India · UDISE+: %{y:.1f}<extra></extra>")
     }
     line_layout(p, y_label)
   }

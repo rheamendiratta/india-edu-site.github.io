@@ -250,10 +250,10 @@ server <- function(input, output, session) {
       p <- add_trace(p,
                      data = df_india, x = ~year, y = ~value,
                      type = "scatter", mode = "lines+markers",
-                     name = "India (WB)",
+                     name = "India · World Bank",
                      line   = list(color = india_col, width = 2.5),
                      marker = list(color = india_col, size = 5),
-                     hovertemplate = "India (WB): %{y:.1f}<extra></extra>"
+                     hovertemplate = "India · World Bank: %{y:.1f}<extra></extra>"
       )
     }
     
@@ -261,10 +261,10 @@ server <- function(input, output, session) {
       p <- add_trace(p,
                      data = df_udise, x = ~year, y = ~value,
                      type = "scatter", mode = "lines+markers",
-                     name = "India (UDISE)",
+                     name = "India · UDISE+",
                      line   = list(color = COL_UDISE, width = 2, dash = "dash"),
                      marker = list(color = COL_UDISE, size = 5),
-                     hovertemplate = "India (UDISE): %{y:.1f}<extra></extra>"
+                     hovertemplate = "India · UDISE+: %{y:.1f}<extra></extra>"
       )
     }
     
@@ -361,18 +361,18 @@ server <- function(input, output, session) {
       }
       if (nrow(df_india) > 0) {
         p <- add_trace(p, data = df_india, x = ~year, y = ~value,
-          type = "scatter", mode = "lines+markers", name = "India (WB)",
+          type = "scatter", mode = "lines+markers", name = "India · World Bank",
           line   = list(color = col, width = 2.5),
           marker = list(color = col, size = 5),
-          hovertemplate = "India (WB): %{y:.1f}<extra></extra>"
+          hovertemplate = "India · World Bank: %{y:.1f}<extra></extra>"
         )
       }
       if (!is.null(df_udise) && nrow(df_udise) > 0) {
         p <- add_trace(p, data = df_udise, x = ~year, y = ~value,
-          type = "scatter", mode = "lines+markers", name = "India (UDISE)",
+          type = "scatter", mode = "lines+markers", name = "India · UDISE+",
           line   = list(color = COL_UDISE, width = 2, dash = "dash"),
           marker = list(color = COL_UDISE, size = 5),
-          hovertemplate = "India (UDISE): %{y:.1f}<extra></extra>"
+          hovertemplate = "India · UDISE+: %{y:.1f}<extra></extra>"
         )
       }
       line_layout(p, meta$y_label)
@@ -431,15 +431,15 @@ server <- function(input, output, session) {
       }
       if (nrow(df_india) > 0)
         p <- add_trace(p, data = df_india, x = ~year, y = ~value,
-          type = "scatter", mode = "lines+markers", name = "India (WB)",
+          type = "scatter", mode = "lines+markers", name = "India · World Bank",
           line = list(color = col, width = 2.5), marker = list(color = col, size = 5),
-          hovertemplate = "India (WB): %{y:.1f}<extra></extra>")
+          hovertemplate = "India · World Bank: %{y:.1f}<extra></extra>")
       if (!is.null(df_udise) && nrow(df_udise) > 0)
         p <- add_trace(p, data = df_udise, x = ~year, y = ~value,
-          type = "scatter", mode = "lines+markers", name = "India (UDISE)",
+          type = "scatter", mode = "lines+markers", name = "India · UDISE+",
           line = list(color = COL_UDISE, width = 2, dash = "dash"),
           marker = list(color = COL_UDISE, size = 5),
-          hovertemplate = "India (UDISE): %{y:.1f}<extra></extra>")
+          hovertemplate = "India · UDISE+: %{y:.1f}<extra></extra>")
       line_layout(p, meta$y_label)
     }
 
@@ -651,16 +651,16 @@ server <- function(input, output, session) {
     }
     if (nrow(df_india) > 0)
       p <- add_trace(p, data = df_india, x = ~year, y = ~value,
-        type = "scatter", mode = "lines+markers", name = "India (WB)",
+        type = "scatter", mode = "lines+markers", name = "India · World Bank",
         line = list(color = COL_ROSE, width = 2.5),
         marker = list(color = COL_ROSE, size = 5),
-        hovertemplate = "India (WB): %{y:.2f}<extra></extra>")
+        hovertemplate = "India · World Bank: %{y:.2f}<extra></extra>")
     if (!is.null(df_udise) && nrow(df_udise) > 0)
       p <- add_trace(p, data = df_udise, x = ~year, y = ~value,
-        type = "scatter", mode = "lines+markers", name = "India (UDISE)",
+        type = "scatter", mode = "lines+markers", name = "India · UDISE+",
         line = list(color = COL_UDISE, width = 2, dash = "dash"),
         marker = list(color = COL_UDISE, size = 5),
-        hovertemplate = "India (UDISE): %{y:.2f}<extra></extra>")
+        hovertemplate = "India · UDISE+: %{y:.2f}<extra></extra>")
 
     p |> line_layout(meta$y_label) |>
       layout(yaxis = list(tickformat = ".2f"))
@@ -705,15 +705,15 @@ server <- function(input, output, session) {
     }
     if (nrow(df_india) > 0)
       p <- add_trace(p, data = df_india, x = ~year, y = ~value,
-        type = "scatter", mode = "lines+markers", name = "India (WB)",
+        type = "scatter", mode = "lines+markers", name = "India · World Bank",
         line = list(color = COL_ROSE, width = 2.5),
         marker = list(color = COL_ROSE, size = 5),
-        hovertemplate = "India (WB): %{y:.1f}%<extra></extra>")
+        hovertemplate = "India · World Bank: %{y:.1f}%<extra></extra>")
     if (!is.null(udise_priv) && nrow(udise_priv) > 0)
       p <- add_trace(p, data = udise_priv, x = ~year, y = ~value,
         type = "scatter", mode = "markers", name = "India (UDISE 2024-25)",
         marker = list(color = COL_UDISE, size = 8, symbol = "diamond"),
-        hovertemplate = "India (UDISE): %{y:.1f}%<extra></extra>")
+        hovertemplate = "India · UDISE+: %{y:.1f}%<extra></extra>")
 
     line_layout(p, meta$y_label)
   })

@@ -98,13 +98,13 @@ ui <- page_sidebar(
         width = 1/2, gap = "12px",
 
         card(
-          card_header("Govt Education Expenditure (% of GDP)"),
+          card_header("Government Education Expenditure (% of GDP)"),
           plotlyOutput("plot_exp_gdp", height = "420px"),
           div(class = "plot-desc", PLOT_META[["EXP_GDP"]]$description)
         ),
 
         card(
-          card_header("Govt Education Expenditure (% of Total Govt Spending)"),
+          card_header("Government Education Expenditure (% of Total Spending)"),
           plotlyOutput("plot_exp_govtbdg", height = "420px"),
           div(class = "plot-desc", PLOT_META[["EXP_GOVTBDG"]]$description)
         ),
